@@ -1,0 +1,2 @@
+# Furia Gaming Community - Games
+Sets a new type of post, called **games**, which is used on [BuddyPress](https://buddypress.org/) groups to set an optional played game by its members. Each *game* can have its own character **races**,**classes** and **roles**. Those can either be shared between games or not, as they are stored as custom [taxonomies](https://codex.wordpress.org/Taxonomies) for the whole site.

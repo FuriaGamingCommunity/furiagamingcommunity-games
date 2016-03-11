@@ -29,7 +29,7 @@ class FuriaGamingCommunity_Games {
 	 * @since 1.0.0
 	 */
 	public function __construct() {
-		
+
 		// Add universal actions
 		add_action( 'init'							, array( $this , 'register_games' 			) );
 		add_action( 'init'							, array( $this , 'register_races' 			) );
@@ -42,6 +42,7 @@ class FuriaGamingCommunity_Games {
 
 		// Admin-only methods
 		if ( is_admin() ) {
+
 			// Admin Actions
 			add_action( 'save_post'					, array( $this , 'save_game' )	, 10, 2 );
 
@@ -101,7 +102,6 @@ class FuriaGamingCommunity_Games {
 			'show_in_menu'			=> true,
 			'show_in_nav_menus'		=> false,
 			'menu_icon'				=> 'dashicons-video-alt3',
-			'menu_position'			=> 7,
 			'capabilities'			=> $game_capabilities,
 			'map_meta_cap'			=> true,
 			'hierarchical'			=> false,
@@ -261,7 +261,7 @@ class FuriaGamingCommunity_Games {
 	 * Customize backend messages when an event is updated.
 	 * @since 1.0.0
 	 */
-	public function update_messages( $game_messages ) {
+	private function update_messages( $game_messages ) {
 		global $post, $post_ID;
 		
 		/* Set some simple messages for editing slides, no post previews needed. */

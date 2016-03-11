@@ -7,7 +7,7 @@
  * Plugin URI: https://github.com/nottu2584/furiagamingcommunity-games
  * Description: Sets a new post type named slides and adds a custom widget to display them into slideshows.
  * Author: Xavier Giménez Segovia
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author URI: https://es.linkedin.com/pub/javier-gimenez-segovia/
  * Author Email: xavier.gimenez.segovia@gmail.com
  * Text Domain: furiagamingcommunity_games
@@ -20,15 +20,67 @@ defined( 'ABSPATH' ) or die( __( 'No script kiddies please!', 'furiagamingcommun
  * Games contain several taxonomies to display related in-game characters features.
  *
  * @author Xavier Giménez Segovia
- * @version 1.0.0
+ * @version 1.0.1
  */
 class FuriaGamingCommunity_Games {
 
 	/**
-	 * Register the custom post and taxonomy with WordPress on init
-	 * @since 1.0.0
+	 * Build the class.
+	 * @since 1.0.1
 	 */
 	public function __construct() {
+
+		$this->constants();
+		$this->setup_globals();
+		$this->includes();
+		$this->setup_actions();
+	}
+
+	/**
+	 * Bootstrap constants.
+	 *
+	 * @since 1.0.1
+	 *
+	 * @uses plugin_dir_path()
+	 * @uses plugin_dir_url()
+	 */
+	private function constants() {
+
+		// Path
+		if ( ! defined( 'FGC_G_PLUGIN_DIR' ) )
+			define( 'FGC_G_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+		// URL
+		if ( ! defined( 'FGC_G_PLUGIN_URL' ) )
+			define( 'FGC_G_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+	}
+
+	/**
+	 * Declare class constants.
+	 *
+	 * @since 1.0.1
+	 */
+	private function setup_globals() {
+
+		$this->file           = constant( 'FGC_G_PLUGIN_DIR' ) . __FILE__;
+		$this->basename       = basename( constant( 'FGC_G_PLUGIN_DIR' ) ) . __FILE__;
+		$this->plugin_dir     = trailingslashit( constant( 'FGC_G_PLUGIN_DIR' ) );
+		$this->plugin_url     = trailingslashit( constant( 'FGC_G_PLUGIN_URL' ) );
+	}
+
+	/**
+	 * Include required files.
+	 *
+	 * @since 1.0.1
+	 */
+	private function includes() {
+		require( $this->plugin_dir . 'classes/class-games-bp-group-extension.php' );
+	}
+
+	/**
+	 * Register the custom post and taxonomy with WordPress
+	 * @since 1.0.0
+	 */
+	public function setup_actions() {
 
 		// Add universal actions
 		add_action( 'init'							, array( $this , 'register_games' 			) );
@@ -37,21 +89,23 @@ class FuriaGamingCommunity_Games {
 		add_action( 'init'							, array( $this , 'register_roles' 			) );
 		
 		// Add universal filters
-		add_filter( 'bp_notifications_get_registered_components' 	, array( $this , 'register_notification' ) 	, 9 , 1 );
-		add_filter( 'bp_notifications_get_notifications_for_user' 	, array( $this , 'format_notification' ) 	, 9 , 5 );
+		add_filter( 'bp_notifications_get_registered_components' 
+													, array( $this , 'register_notification' ) 	, 9 , 1 );
+		add_filter( 'bp_notifications_get_notifications_for_user' 
+													, array( $this , 'format_notification' ) 	, 9 , 5 );
 
 		// Admin-only methods
 		if ( is_admin() ) {
 
 			// Admin Actions
-			add_action( 'save_post'					, array( $this , 'save_game' )	, 10, 2 );
+			add_action( 'save_post'					, array( $this , 'save_game' )				, 10, 2 );
 
-			add_action( 'edited_race'				, array( $this , 'save_race' ) , 10, 2 );
-			add_action( 'create_race'				, array( $this , 'save_race' ), 10, 2 );
-			add_action( 'edited_class'				, array( $this , 'save_class' ) , 10, 2 );  
-			add_action( 'create_class'				, array( $this , 'save_class' ), 10, 2 );
-			add_action( 'edited_role'				, array( $this , 'save_roles' ) , 10, 2 );
-			add_action( 'create_role'				, array( $this , 'save_roles' ), 10, 2 );
+			add_action( 'edited_race'				, array( $this , 'save_race' )				, 10, 2 );
+			add_action( 'create_race'				, array( $this , 'save_race' )				, 10, 2 );
+			add_action( 'edited_class'				, array( $this , 'save_class' )				, 10, 2 );  
+			add_action( 'create_class'				, array( $this , 'save_class' )				, 10, 2 );
+			add_action( 'edited_role'				, array( $this , 'save_roles' )				, 10, 2 );
+			add_action( 'create_role'				, array( $this , 'save_roles' )				, 10, 2 );
 				
 			// Admin Filters
 			add_filter( 'post_updated_messages'		, array( $this , 'update_messages') );
@@ -353,7 +407,43 @@ class FuriaGamingCommunity_Games {
 	}
 	
 } // class FuriaGamingCommunity_Games
-register_activation_hook( basename( __FILE__ ), new FuriaGamingCommunity_Games );
+	
+/**
+ * Helper functions to set context on game pages
+ * @since 1.0.1
+*/
+function FuriaGamingCommunity_Games_init() {
+	register_activation_hook( basename( __FILE__ ), new FuriaGamingCommunity_Games );
+}
+add_action( 'bp_include', 'FuriaGamingCommunity_Games_init' );
+
+/**
+ * Display admin notices
+ * @since 1.0.1
+ *
+ * @param str $message Text message to display at the notice.
+ * @param str $type [error|info|success|warning] Type of message.
+*/
+function FuriaGamingCommunity_Games_notices( $message, $type = 'warning' ) {
+    ?>
+    <div class="notice notice-<?php echo $type ?>">
+        <p><?php echo $message; ?></p>
+    </div>
+    <?php
+}
+add_action( 'admin_notices', 'notices', 10, 2 );
+
+/**
+ * Register the text domain
+ * @since 1.0.0
+*/
+function FuriaGamingCommunity_Games_load_textdomain() {
+	load_plugin_textdomain( 'furiagamingcommunity_games', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+}
+add_action('plugins_loaded', 'FuriaGamingCommunity_Games_load_textdomain');
+
+
+/** Not class dependent functions *********************************************/
 
 /**
  * Helper functions to set context on game pages
@@ -428,10 +518,4 @@ function get_game_classes( $post_id ) {
 function get_game_roles( $post_id ) {
 	return wp_get_post_terms( $post_id, 'game-roles' );
 }
-
-// Register the text domain.
-function FuriaGamingCommunity_Games_load_textdomain() {
-	load_plugin_textdomain( 'furiagamingcommunity_games', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-}
-add_action('plugins_loaded', 'FuriaGamingCommunity_Games_load_textdomain');
 ?>

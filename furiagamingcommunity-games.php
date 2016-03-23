@@ -9,7 +9,7 @@
  * @author Xavier Giménez Segovia <xavier.gimenez.segovia@gmail.com>
  * @license GPL-2.0+
  **/
- 
+
 /**
  * Plugin Name:     Furia Gaming Community - Games
  * Plugin URI:      https://github.com/nottu2584/furiagamingcommunity-games
@@ -26,6 +26,8 @@
 // Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
 
+if ( !class_exists('FuriaGamingCommunity_Games') ) :
+
 /**
  * Inits the plugin dependencies.
  *
@@ -34,68 +36,96 @@ defined( 'ABSPATH' ) || exit;
  */
 class FuriaGamingCommunity_Games {
 
-    /**
-     * Set all dependencies.
-     * @since 1.0.1
-     */
-    public function __construct() {
+	public static function instance() {
 
-        $this->constants();
-        $this->setup_globals();
-        $this->includes();
-    }
+		// Store the instance locally to avoid private static replication
+		static $instance = null;
 
-    /**
-     * Bootstrap constants.
-     *
-     * @since 1.0.1
-     *
-     * @uses plugin_dir_path()
-     * @uses plugin_dir_url()
-     */
-    private function constants() {
+		// Only run these methods if they haven't been run previously
+		if ( null === $instance ) {
+			$instance = new FuriaGamingCommunity_Games;
+			$instance->constants();
+			$instance->setup_globals();
+			$instance->includes();
+			$instance->setup_classes();
+		}
 
-        // Path
-        if ( ! defined( 'FGC_G_PLUGIN_DIR' ) )
-            define( 'FGC_G_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-        // URL
-        if ( ! defined( 'FGC_G_PLUGIN_URL' ) )
-            define( 'FGC_G_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-    }
+		// Always return the instance
+		return $instance;
+	}
 
-    /**
-     * Declare class constants.
-     *
-     * @since 1.0.1
-     */
-    private function setup_globals() {
+	/**
+	 * A dummy constructor to prevent FuriaGamingCommunity_Games from being loaded more than once..
+	 * @since 1.0.1
+	 */
+	private function __construct() { /* Do nothing here */ }
 
-        $this->file           = constant( 'FGC_G_PLUGIN_DIR' ) . __FILE__;
-        $this->basename       = basename( constant( 'FGC_G_PLUGIN_DIR' ) ) . __FILE__;
-        $this->plugin_dir     = trailingslashit( constant( 'FGC_G_PLUGIN_DIR' ) );
-        $this->plugin_url     = trailingslashit( constant( 'FGC_G_PLUGIN_URL' ) );
-    }
+	/**
+	 * Bootstrap constants.
+	 *
+	 * @since 1.0.1
+	 *
+	 * @uses plugin_dir_path()
+	 * @uses plugin_dir_url()
+	 */
+	private function constants() {
 
-    /**
-     * Include required files.
-     *
-     * @since 1.0.1
-     */
-    private function includes() {
-        require( $this->plugin_dir . 'class/class-games.php' );
-        require( $this->plugin_dir . 'class/class-games-bp-group-extension.php' );
-    }
-    
+		// Path
+		if ( ! defined( 'FGC_G_PLUGIN_DIR' ) )
+			define( 'FGC_G_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+		// URL
+		if ( ! defined( 'FGC_G_PLUGIN_URL' ) )
+			define( 'FGC_G_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+	}
+
+	/**
+	 * Declare class constants.
+	 *
+	 * @since 1.0.1
+	 */
+	private function setup_globals() {
+
+		$this->file           = constant( 'FGC_G_PLUGIN_DIR' ) . __FILE__;
+		$this->basename       = basename( constant( 'FGC_G_PLUGIN_DIR' ) ) . __FILE__;
+
+		$this->plugin_dir     = trailingslashit( constant( 'FGC_G_PLUGIN_DIR' ) );
+		$this->plugin_url     = trailingslashit( constant( 'FGC_G_PLUGIN_URL' ) );
+	}
+
+	/**
+	 * Include required files.
+	 *
+	 * @since 1.0.1
+	 */
+	private function includes() {
+
+		require( $this->plugin_dir . 'classes/class-games.php' );
+		require( $this->plugin_dir . 'classes/class-games-bp-group-extension.php' );
+	}
+
+	/**
+	 * Setup classes.
+	 *
+	 * @since 1.0.2
+	 */
+	private function setup_classes() {
+
+		$this->games          = new Games();
+	}
+		
 } // class FuriaGamingCommunity_Games
-    
+
+
 /**
- * Helper functions to set context on game pages
- * @since 1.0.1
+ * Launch a single instance of the plugin
+ * @since 1.0.2
+ * 
+ * @return FuriaGamingCommunity_Games The plugin instance
  */
-function furiagamingcommunity_games_init() {
-    register_activation_hook( basename( __FILE__ ), new FuriaGamingCommunity_Games );
+function furiagamingcommunity_games() {
+	return FuriaGamingCommunity_Games::instance();
 }
-add_action( 'bp_include', 'furiagamingcommunity_games_init' );
+add_action( 'bp_include', 'furiagamingcommunity_games' );
 
 /**
  * Display admin notices
@@ -105,19 +135,19 @@ add_action( 'bp_include', 'furiagamingcommunity_games_init' );
  * @param str $type [error|info|success|warning] Type of message.
  */
 function furiagamingcommunity_games_notices( $message, $type = 'warning' ) {
-    
-    if ( $message ) :
-    
-    ?>
-    <div class="notice notice-<?php echo $type ?>">
-        <p><?php echo $message; ?></p>
-    </div>
-    <?php
+	
+	if ( $message ) :
 
-    else :
-        return false;
+		?>
+	<div class="notice notice-<?php echo $type ?>">
+		<p><?php echo $message; ?></p>
+	</div>
+	<?php
 
-    endif;
+	else :
+		return false;
+
+	endif;
 }
 
 /**
@@ -125,13 +155,14 @@ function furiagamingcommunity_games_notices( $message, $type = 'warning' ) {
  * @since 1.0.0
  */
 function furiagamingcommunity_games_load_textdomain() {
-    load_plugin_textdomain( 'furiagamingcommunity_games', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+	load_plugin_textdomain( 'furiagamingcommunity_games', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
 add_action('plugins_loaded', 'furiagamingcommunity_games_load_textdomain');
 
+endif;
 
 /** 
- * Plugin functions.
+ * Plugin helper functions.
  *
  * General plugin functions and helpers for the game post type.
  */
@@ -143,9 +174,9 @@ add_action('plugins_loaded', 'furiagamingcommunity_games_load_textdomain');
  * @return bool Returns true if the selected race taxonomy is inside the queried post.
  */
 function is_game_race() {
-    global $wp_query;
-    if ( 'game-races' == $wp_query->queried_object->taxonomy )
-        return true;
+	global $wp_query;
+	if ( 'game-races' == $wp_query->queried_object->taxonomy )
+		return true;
 }
 
 /**
@@ -155,9 +186,9 @@ function is_game_race() {
  * @return bool Returns true if the selected class taxonomy is inside the queried post.
  */
 function is_game_class() {
-    global $wp_query;
-    if ( 'game-classes' == $wp_query->queried_object->taxonomy )
-        return true;
+	global $wp_query;
+	if ( 'game-classes' == $wp_query->queried_object->taxonomy )
+		return true;
 }
 
 /**
@@ -167,9 +198,9 @@ function is_game_class() {
  * @return bool Returns true if the selected role taxonomy is inside the queried post.
  */
 function is_game_role() {
-    global $wp_query;
-    if ( 'game-roles' == $wp_query->queried_object->taxonomy )
-        return true;
+	global $wp_query;
+	if ( 'game-roles' == $wp_query->queried_object->taxonomy )
+		return true;
 }
 
 /**
@@ -179,36 +210,36 @@ function is_game_role() {
  * @return array|bool Retrieves a list of posts matching the game type. Returns false if empty.
  */
 function get_games() {
-    
-    $args = array(
-        'post_type'         => 'game',
-        'post_status'       => 'publish'
-        );
+	
+	$args = array(
+		'post_type'         => 'game',
+		'post_status'       => 'publish'
+		);
 
-    $posts = get_posts( $args );
-
-    if ( empty( $posts ) )
-        return false;
-    else
-        return $posts;
+	return get_posts( $args );
 }
 
 /**
  * Get a single game by the slug
  * @since 1.0.0
  *
- * @return array|bool Retrieves a list of posts matching the game type selected by the game slug. Returns false in case the slug was not provided.
+ * @return array|bool Retrieves a posts matching the game slug. Returns false in case the slug was not provided.
  */
 function get_game_by_slug( $slug ) {
-    if ( '' != $slug ) {
-        $args = array(
-            'name'        => $slug,
-            'post_type'   => 'game',
-            'post_status' => 'publish',
-            'numberposts' => 1
-        );
-        return get_posts($args);
-    } else return false;
+	
+	if ( '' != $slug ) {
+		$args = array(
+			'post_name'   => $slug,
+			'post_type'   => 'game',
+			'post_status' => 'publish',
+			'numberposts' => 1
+			);
+		
+		$game = get_posts($args);
+
+		return $game[0];
+
+	} else return false;
 }
 
 /**
@@ -218,7 +249,7 @@ function get_game_by_slug( $slug ) {
  * @return array List of post terms under game races.
  */
 function get_game_races( $post_id ) {
-    return wp_get_post_terms( $post_id, 'game-races' );
+	return wp_get_post_terms( $post_id, 'game-races' );
 }
 
 /**
@@ -228,7 +259,7 @@ function get_game_races( $post_id ) {
  * @return array List of post terms under game classes.
  */
 function get_game_classes( $post_id ) {
-    return wp_get_post_terms( $post_id, 'game-classes' );
+	return wp_get_post_terms( $post_id, 'game-classes' );
 }
 
 /**
@@ -238,6 +269,6 @@ function get_game_classes( $post_id ) {
  * @return array List of post terms under game roles.
  */
 function get_game_roles( $post_id ) {
-    return wp_get_post_terms( $post_id, 'game-roles' );
+	return wp_get_post_terms( $post_id, 'game-roles' );
 }
 ?>

@@ -15,6 +15,8 @@ defined( 'ABSPATH' ) || exit;
  * @author Xavier Giménez Segovia
  * @version 1.0.1
  */
+if ( !class_exists('Games') ) :
+
 class Games {
 
 	/**
@@ -265,7 +267,7 @@ class Games {
 	 * Customize backend messages when an event is updated.
 	 * @since 1.0.0
 	 */
-	private function update_messages( $game_messages ) {
+	public function update_messages( $game_messages ) {
 		global $post, $post_ID;
 		
 		/* Set some simple messages for editing slides, no post previews needed. */
@@ -358,6 +360,5 @@ class Games {
 	
 } // class Games
 
-// Initialize Games
-$games = new Games();
+endif;
 ?>

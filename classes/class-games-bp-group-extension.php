@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
  * The class_exists() check is recommended, to prevent problems during upgrade
  * or when the Groups component is disabled
  */
-if ( class_exists( 'BP_Group_Extension' ) ) :
+if ( class_exists( 'BP_Group_Extension' ) && !class_exists('Group_Extension_Games') ) :
   
 	class Group_Extension_Games extends BP_Group_Extension {
 		/**
@@ -35,7 +35,25 @@ if ( class_exists( 'BP_Group_Extension' ) ) :
 		 */
 		function display( $group_id = NULL ) {
 			$group_id = bp_get_group_id();
-			echo 'What a cool plugin!';
+
+			// Get group game meta and game list
+			$group_game = groups_get_groupmeta( $group_id, 'group-game' );
+			$games = get_games();
+			?>
+			
+			<?php if ( !$group_game ) : ?>
+			
+			<p><?php _e( 'This group is not set to any game.', 'furiagamingcommunity_games' ); ?></p>
+			
+			<?php else : ?>
+				
+			<?php $game = get_game_by_slug( $group_game ); ?>
+			
+			<p><?php printf( __( 'This group is set to players from <a href="%1$s">%2$s</a>.', 'furiagamingcommunity_games' ), get_permalink( $game ), $game->post_title ); ?><p>
+			
+			<?php endif; ?>
+
+			<?php
 		}
 	 
 		/**
@@ -44,13 +62,12 @@ if ( class_exists( 'BP_Group_Extension' ) ) :
 		 */
 		function settings_screen( $group_id = NULL ) {
 
-			// Get the meta.
-			$setting = groups_get_groupmeta( $group_id, 'group-game' );
-			// Get all games.
+			// Get group game meta and game list
+			$group_game = groups_get_groupmeta( $group_id, 'group-game' );
 			$games = get_games();
 			?>
 
-			<?php if ( !$games ) : ?>
+			<?php if ( empty( $games ) ) : ?>
 			<div id="message" class="info">
 				<p><?php _e('You need to set up some games before being able to assign them to any group.'); ?></p>
 			</div>
@@ -58,13 +75,14 @@ if ( class_exists( 'BP_Group_Extension' ) ) :
 			
 			<div>
 				<label for="group-game"><?php _e('Group game', 'furiagamingcommunity_games');?></label>
-				<select name="group-game" id="group-game" aria-required="true" <?php disabled( $games, '' ); ?> >
+				<select name="group-game" id="group-game" aria-required="true" <?php disabled( empty( $games ), true ); ?> >
 					<option value="" default><?php _e('None', 'furiagamingcommunity_games'); ?></option>
-					<?php
-						print_r($games);
-					?>
+					<?php if ( !empty( $games ) ) : foreach( $games as $game ) :	?>
+					<option value="<?php echo strtolower( $game->post_name ); ?>" id="<?php echo 'game-' . $game->ID; ?>" <?php selected( $group_game, $game->post_name ); ?> ><?php echo $game->post_title; ?></option>
+					<?php endforeach; endif; ?>
 				</select>
 			</div>
+
 			<?php
 		}
 	 
@@ -82,10 +100,12 @@ if ( class_exists( 'BP_Group_Extension' ) ) :
 			groups_update_groupmeta( $group_id, 'group-game', $setting );
 		}
 	}
+
 	bp_register_group_extension( 'Group_Extension_Games' );
 
 else:
-	if ( is_admin() )
+	
+	if ( is_admin() && !class_exists( 'BP_Group_Extension' ) )
 		furiagamingcommunity_games_notices( _e('BuddyPress Group Extension not found!', 'furiagamingcommunity_games'), 'warning' );
 endif;
 ?>

@@ -39,6 +39,7 @@ class Games {
 		add_action( 'init'							, array( $this , 'register_races' 			) );
 		add_action( 'init'							, array( $this , 'register_classes' 		) );
 		add_action( 'init'							, array( $this , 'register_roles' 			) );
+		add_action( 'init'							, array( $this , 'register_types' 			) );
 		
 		// Add universal filters
 		add_filter( 'bp_notifications_get_registered_components' 
@@ -51,16 +52,21 @@ class Games {
 
 			// Admin Actions
 			add_action( 'save_post'					, array( $this , 'save_game' )				, 10, 2 );
+			add_action( 'save_post'					, array( $this , 'save_meta' )				, 10, 2 );
 
 			add_action( 'edited_race'				, array( $this , 'save_race' )				, 10, 2 );
 			add_action( 'create_race'				, array( $this , 'save_race' )				, 10, 2 );
 			add_action( 'edited_class'				, array( $this , 'save_class' )				, 10, 2 );  
 			add_action( 'create_class'				, array( $this , 'save_class' )				, 10, 2 );
-			add_action( 'edited_role'				, array( $this , 'save_roles' )				, 10, 2 );
-			add_action( 'create_role'				, array( $this , 'save_roles' )				, 10, 2 );
+			add_action( 'edited_role'				, array( $this , 'save_role' )				, 10, 2 );
+			add_action( 'create_role'				, array( $this , 'save_role' )				, 10, 2 );
+			add_action( 'edited_type'				, array( $this , 'save_type' )				, 10, 2 );
+			add_action( 'create_type'				, array( $this , 'save_type' )				, 10, 2 );
 				
 			// Admin Filters
-			add_filter( 'post_updated_messages'		, array( $this , 'update_messages') );
+			add_filter( 'post_updated_messages'		, array( $this , 'update_messages' )				);
+			add_action( 'manage_posts_custom_column', array( $this , 'custom_columns' )					);
+			add_filter( 'manage_edit-slide_columns'	, array( $this , 'edit_columns'	)					);
 		}
 	}
 	
@@ -80,8 +86,8 @@ class Games {
 			'new_item'				=> __('New game', 'furiagamingcommunity_games'),
 			'view_item'				=> __('View game', 'furiagamingcommunity_games'),
 			'search_items'			=> __('Search games', 'furiagamingcommunity_games'),
-			'not_found'				=> __('No events found', 'furiagamingcommunity_games'),
-			'not_found_in_trash'	=> __('No events found in Trash', 'furiagamingcommunity_games'), 
+			'not_found'				=> __('No games found', 'furiagamingcommunity_games'),
+			'not_found_in_trash'	=> __('No games found in Trash', 'furiagamingcommunity_games'), 
 			'parent_item_colon'		=> '',
 			'menu_name'				=> __('Games', 'furiagamingcommunity_games'),
 			'all_items'				=> __('All games', 'furiagamingcommunity_games')
@@ -112,7 +118,7 @@ class Games {
 			'map_meta_cap'			=> true,
 			'hierarchical'			=> false,
 			'supports'				=> array( 'title', 'editor' ),
-			'taxonomies'			=> array( 'game-races' , 'game-classes' ),
+			'taxonomies'			=> array( 'game-races' , 'game-classes', 'game-roles', 'game-types' ),
 			'has_archive'			=> false,
 			'rewrite'				=> array(
 				'slug' 	=> 'game',
@@ -225,7 +231,7 @@ class Games {
 	public function register_roles() {
 		
 		/* Classes */
-		$class_tax_labels = array(			
+		$role_tax_labels = array(			
 			'name'							=> __('Roles', 'furiagamingcommunity_games'),
 			'singular_name'					=> __('Role', 'furiagamingcommunity_games'),
 			'search_items'					=> __('Search Roles', 'furiagamingcommunity_games'),
@@ -241,26 +247,71 @@ class Games {
 			'choose_from_most_used'			=> __('Choose from the most used roles', 'furiagamingcommunity_games'),
 			);
 		
-		$class_tax_caps = array(
+		$role_tax_caps = array(
 			'manage_terms'	=> 'manage_categories',
 			'edit_terms'	=> 'manage_categories',
 			'delete_terms'	=> 'manage_categories',
 			'assign_terms'	=> 'edit_posts'
 			);
 		
-		$class_tax_args = array(
-			'labels'				=> $class_tax_labels,
+		$role_tax_args = array(
+			'labels'				=> $role_tax_labels,
 			'public'				=> true,
 			'show_ui'				=> true,
 			'show_in_nav_menus'		=> false,
 			'show_tagcloud'			=> false,
 			'hierarchical'			=> false,
 			'rewrite'				=> array( 'slug' => 'role' ),
-			'capabilities'    	  	=> $class_tax_caps,
+			'capabilities'    	  	=> $role_tax_caps,
 			);		
 
 		/* Register the Class post taxonomy! */
-		register_taxonomy( 'game-roles', 'game', $class_tax_args );
+		register_taxonomy( 'game-roles', 'game', $role_tax_args );
+	}
+
+	/**
+	 * Register a Types taxonomy for Games
+	 * @since 1.0.0
+	 */
+	public function register_types() {
+		
+		/* Classes */
+		$type_tax_labels = array(			
+			'name'							=> __('Types', 'furiagamingcommunity_games'),
+			'singular_name'					=> __('Type', 'furiagamingcommunity_games'),
+			'search_items'					=> __('Search Types', 'furiagamingcommunity_games'),
+			'popular_items'					=> __('Popular Types', 'furiagamingcommunity_games'),
+			'all_items'						=> __('All Types', 'furiagamingcommunity_games'),
+			'edit_item'						=> __('Edit Types', 'furiagamingcommunity_games'),
+			'update_item'					=> __('Update Types', 'furiagamingcommunity_games'),
+			'add_new'						=> __('New Type', 'furiagamingcommunity_games'),
+			'add_new_item'					=> __('Add New Type', 'furiagamingcommunity_games'),
+			'new_item_name'					=> __('New Type Name', 'furiagamingcommunity_games'),
+			'menu_name'						=> __('Types', 'furiagamingcommunity_games'),
+			'separate_items_with_commas'	=> __('Separate types with commas', 'furiagamingcommunity_games'),
+			'choose_from_most_used'			=> __('Choose from the most used types', 'furiagamingcommunity_games'),
+			);
+		
+		$type_tax_caps = array(
+			'manage_terms'	=> 'manage_categories',
+			'edit_terms'	=> 'manage_categories',
+			'delete_terms'	=> 'manage_categories',
+			'assign_terms'	=> 'edit_posts'
+			);
+		
+		$type_tax_args = array(
+			'labels'				=> $type_tax_labels,
+			'public'				=> true,
+			'show_ui'				=> true,
+			'show_in_nav_menus'		=> false,
+			'show_tagcloud'			=> false,
+			'hierarchical'			=> true,
+			'rewrite'				=> array( 'slug' => 'type' ),
+			'capabilities'    	  	=> $type_tax_caps,
+			);		
+
+		/* Register the Class post taxonomy! */
+		register_taxonomy( 'game-types', 'game', $type_tax_args );
 	}
 
 	/**
@@ -291,6 +342,40 @@ class Games {
 			);
 		return $game_messages;
 	}
+
+	/**
+	 * Save the game meta fields
+	 * @version 1.1.0
+	 */
+	public function save_meta( $post_id ) {
+		
+		// Verify the nonce before proceeding. 
+		if ( !isset( $_POST['game-settings-box'] ) || !wp_verify_nonce( $_POST['game-settings-box'], basename( __FILE__ ) ) )
+			return $post_id;
+		
+		// Assign names for the slide metadata 
+		$meta = array(
+			'game_group'		=> $_POST['game-group']
+			);
+		
+		foreach ( $meta as $meta_key => $new_meta_value ) {
+
+			// Get the meta value of the custom field key. 
+			$meta_value = get_post_meta( $post_id, $meta_key, true );
+
+			// If there is no new meta value but an old value exists, delete it. 
+			if ( current_user_can( 'delete_post_meta', $post_id, $meta_key ) && '' == $new_meta_value && $meta_value )
+				delete_post_meta( $post_id, $meta_key, $meta_value );
+
+			// If a new meta value was added and there was no previous value, add it. 
+			elseif ( current_user_can( 'add_post_meta', $post_id, $meta_key ) && $new_meta_value && '' == $meta_value )
+				add_post_meta( $post_id, $meta_key, $new_meta_value, true );
+
+			// If the new meta value does not match the old value, update it. 
+			elseif ( current_user_can( 'edit_post_meta', $post_id, $meta_key ) && $new_meta_value && $new_meta_value != $meta_value )
+				update_post_meta( $post_id, $meta_key, $new_meta_value );
+		}
+	}	
 
 	/**
 	 * Save or update a new event
@@ -329,10 +414,23 @@ class Games {
 	}
 
 	/**
-	 * Save custom class taxonomy.
+	 * Save custom role taxonomy.
 	 * @since 1.0.0
 	 */
 	public function save_role( $term_id ) {
+		
+		$term_meta 	= get_option( "taxonomy_$term_id" );
+		
+		// Otherwise, if it had a value, remove it
+		if ( !empty( $term_meta ) )
+			delete_option( "taxonomy_$term_id" );
+	}
+
+	/**
+	 * Save custom type taxonomy.
+	 * @since 1.1.0
+	 */
+	public function save_type( $term_id ) {
 		
 		$term_meta 	= get_option( "taxonomy_$term_id" );
 		
@@ -356,6 +454,44 @@ class Games {
 	 */		
 	public function format_notification( $action, $item_id, $secondary_item_id, $total_items , $format = 'string' ) {
 		return $action;
+	}
+
+		/**
+	 * Adds the slide featured image and link to the slides page
+	 * @since 1.0.0
+	 */
+	public function edit_columns( $columns ) {
+		$columns = array(		
+			'cb'			=> '<input type="checkbox" />',
+			'title'			=> __('Game Title', 'furiagamingcommunity_games'),
+			'type'			=> __('Type', 'furiagamingcommunity_games')
+			);
+		return $columns; 
+	}
+	
+	/**
+	 * Adds content to the custom column format
+	 * @since 1.0.0
+	 */
+	public function custom_columns( $columns ) {
+		global $post;
+		switch ( $columns ) {
+			case 'slide' :
+			echo get_the_post_thumbnail( $post->ID , 'medium');
+			break;
+			
+			case 'show' :
+			echo get_the_term_list( $post->ID , 'slideshow' );
+			break;
+			
+			case 'slide-link' :	
+			if ( get_post_meta($post->ID, "Permalink", $single = true) != "" ) {
+				echo "<a href='" . get_post_meta($post->ID, "Permalink", $single = true) . "'>" . get_post_meta($post->ID, "Permalink", $single = true) . "</a>";
+			} else {
+				_e('No Link', 'furiagamingcommunity_games');
+			}	
+			break;
+		}
 	}
 	
 } // class Games

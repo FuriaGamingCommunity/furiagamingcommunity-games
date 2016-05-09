@@ -50,23 +50,21 @@ class Games {
 		// Admin-only methods
 		if ( is_admin() ) {
 
-			// Admin Actions
-			add_action( 'save_post'					, array( $this , 'save_game' )				, 10, 2 );
-			add_action( 'save_post'					, array( $this , 'save_meta' )				, 10, 2 );
-
-			add_action( 'edited_race'				, array( $this , 'save_race' )				, 10, 2 );
-			add_action( 'create_race'				, array( $this , 'save_race' )				, 10, 2 );
-			add_action( 'edited_class'				, array( $this , 'save_class' )				, 10, 2 );  
-			add_action( 'create_class'				, array( $this , 'save_class' )				, 10, 2 );
-			add_action( 'edited_role'				, array( $this , 'save_role' )				, 10, 2 );
-			add_action( 'create_role'				, array( $this , 'save_role' )				, 10, 2 );
-			add_action( 'edited_type'				, array( $this , 'save_type' )				, 10, 2 );
-			add_action( 'create_type'				, array( $this , 'save_type' )				, 10, 2 );
-				
 			// Admin Filters
-			add_filter( 'post_updated_messages'		, array( $this , 'update_messages' )				);
-			add_action( 'manage_posts_custom_column', array( $this , 'custom_columns' )					);
-			add_filter( 'manage_edit-slide_columns'	, array( $this , 'edit_columns'	)					);
+			add_filter( 'post_updated_messages'				, array( $this , 'update_messages' )				);
+			add_filter( 'manage_edit-game_columns'			, array( $this , 'edit_game_columns' )				);
+
+			// Admin Actions
+			add_action( 'save_post'							, array( $this , 'save_game' )				, 10, 2 );
+			add_action( 'edited_race'						, array( $this , 'save_race' )				, 10, 2 );
+			add_action( 'create_race'						, array( $this , 'save_race' )				, 10, 2 );
+			add_action( 'edited_class'						, array( $this , 'save_class' )				, 10, 2 );  
+			add_action( 'create_class'						, array( $this , 'save_class' )				, 10, 2 );
+			add_action( 'edited_role'						, array( $this , 'save_role' )				, 10, 2 );
+			add_action( 'create_role'						, array( $this , 'save_role' )				, 10, 2 );
+			add_action( 'edited_type'						, array( $this , 'save_type' )				, 10, 2 );
+			add_action( 'create_type'						, array( $this , 'save_type' )				, 10, 2 );
+			add_action( 'manage_game_posts_custom_column'	, array( $this , 'manage_game_columns' )	, 10, 2	);
 		}
 	}
 	
@@ -344,40 +342,6 @@ class Games {
 	}
 
 	/**
-	 * Save the game meta fields
-	 * @version 1.1.0
-	 */
-	public function save_meta( $post_id ) {
-		
-		// Verify the nonce before proceeding. 
-		if ( !isset( $_POST['game-settings-box'] ) || !wp_verify_nonce( $_POST['game-settings-box'], basename( __FILE__ ) ) )
-			return $post_id;
-		
-		// Assign names for the slide metadata 
-		$meta = array(
-			'game_group'		=> $_POST['game-group']
-			);
-		
-		foreach ( $meta as $meta_key => $new_meta_value ) {
-
-			// Get the meta value of the custom field key. 
-			$meta_value = get_post_meta( $post_id, $meta_key, true );
-
-			// If there is no new meta value but an old value exists, delete it. 
-			if ( current_user_can( 'delete_post_meta', $post_id, $meta_key ) && '' == $new_meta_value && $meta_value )
-				delete_post_meta( $post_id, $meta_key, $meta_value );
-
-			// If a new meta value was added and there was no previous value, add it. 
-			elseif ( current_user_can( 'add_post_meta', $post_id, $meta_key ) && $new_meta_value && '' == $meta_value )
-				add_post_meta( $post_id, $meta_key, $new_meta_value, true );
-
-			// If the new meta value does not match the old value, update it. 
-			elseif ( current_user_can( 'edit_post_meta', $post_id, $meta_key ) && $new_meta_value && $new_meta_value != $meta_value )
-				update_post_meta( $post_id, $meta_key, $new_meta_value );
-		}
-	}	
-
-	/**
 	 * Save or update a new event
 	 * @since 1.0.0
 	 */
@@ -456,15 +420,16 @@ class Games {
 		return $action;
 	}
 
-		/**
+	/**
 	 * Adds the slide featured image and link to the slides page
 	 * @since 1.0.0
 	 */
-	public function edit_columns( $columns ) {
+	public function edit_game_columns( $columns ) {
 		$columns = array(		
 			'cb'			=> '<input type="checkbox" />',
-			'title'			=> __('Game Title', 'furiagamingcommunity_games'),
-			'type'			=> __('Type', 'furiagamingcommunity_games')
+			'title'			=> __( 'Game Title', 'furiagamingcommunity_games' ),
+			'type'			=> __( 'Type', 'furiagamingcommunity_games' ),
+			'date'			=> __( 'Date', 'furiagamingcommunity_games' )
 			);
 		return $columns; 
 	}
@@ -473,23 +438,37 @@ class Games {
 	 * Adds content to the custom column format
 	 * @since 1.0.0
 	 */
-	public function custom_columns( $columns ) {
+	public function manage_game_columns( $columns ) {
+		
 		global $post;
+		
 		switch ( $columns ) {
-			case 'slide' :
-			echo get_the_post_thumbnail( $post->ID , 'medium');
-			break;
 			
-			case 'show' :
-			echo get_the_term_list( $post->ID , 'slideshow' );
-			break;
-			
-			case 'slide-link' :	
-			if ( get_post_meta($post->ID, "Permalink", $single = true) != "" ) {
-				echo "<a href='" . get_post_meta($post->ID, "Permalink", $single = true) . "'>" . get_post_meta($post->ID, "Permalink", $single = true) . "</a>";
-			} else {
-				_e('No Link', 'furiagamingcommunity_games');
-			}	
+			case 'type' :
+				// Get the types for the post.
+				$terms = get_the_terms( $post->ID, 'game-types' );
+
+				// If terms were found.
+				if ( !empty( $terms ) ) {
+
+					$out = array();
+
+					// Loop through each term, linking to the 'edit posts' page for the specific term.
+					foreach ( $terms as $term ) {
+						$out[] = sprintf( '<a href="%s">%s</a>',
+							esc_url( add_query_arg( array( 'post_type' => $post->post_type, 'type' => $term->slug ), 'edit.php' ) ),
+							esc_html( sanitize_term_field( 'name', $term->name, $term->term_id, 'type', 'display' ) )
+						);
+					}
+
+					// Join the terms, separating them with a comma.
+					echo join( ', ', $out );
+				}
+
+				// If no terms were found, output a default message.
+				else {
+					_e( 'None', 'furiagamingcommunity_games' );
+				}
 			break;
 		}
 	}

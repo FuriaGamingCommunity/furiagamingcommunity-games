@@ -77,7 +77,7 @@ function get_games() {
  * @return array List of terms under game-races.
  */
 function get_terms_races() {
-	return get_terms( 'game-races' );
+	return get_terms( 'game-races', array( 'hide_empty' => false ) );
 }
 
 /**
@@ -87,7 +87,7 @@ function get_terms_races() {
  * @return array List of terms under game-classes.
  */
 function get_terms_classes() {
-	return get_terms( 'game-classes' );
+	return get_terms( 'game-classes', array( 'hide_empty' => false ) );
 }
 
 /**
@@ -97,7 +97,7 @@ function get_terms_classes() {
  * @return array List of terms under game-roles.
  */
 function get_terms_roles() {
-	return get_terms( 'game-roles' );
+	return get_terms( 'game-roles', array( 'hide_empty' => false ) );
 }
 
 /**
@@ -107,7 +107,7 @@ function get_terms_roles() {
  * @return array List of terms under game-types.
  */
 function get_terms_types() {
-	return get_terms( 'game-types' );
+	return get_terms( 'game-types', array( 'hide_empty' => false ) );
 }
 
 /**
@@ -234,6 +234,10 @@ function get_game_types( $post_id ) {
  */
 
 function admin_notices_bp_groups_missing() {	
-	echo '<div class="notice update-nag">' . sprintf( __( 'The Game Group extension needs <strong><a href="%1$s">BuddyPress</a> <em>Groups</em></strong> extension enabled in order to function correctly.', 'furiagamingcommunity_games'), admin_url('options-general.php?page=bp-components') ) . '</div>';
+	echo '<div class="notice-warning">' . sprintf( __( 'The Game Group extension needs <strong><a href="%1$s">BuddyPress</a> <em>Groups</em></strong> extension enabled in order to function correctly.', 'furiagamingcommunity_games'), admin_url('options-general.php?page=bp-components') ) . '</div>';
+}
+
+function admin_notices_game_type_not_set( $message ) {	
+	echo '<div class="notice-error">' . sprintf( __( 'An error occurred while adding the selected game group type: %1$s', 'furiagamingcommunity_games'), $message ) . '</div>';
 }
 ?>

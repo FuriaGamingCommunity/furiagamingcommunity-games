@@ -17,7 +17,7 @@
  * Author:          Xavier Giménez Segovia
  * Author URI:      https://es.linkedin.com/pub/javier-gimenez-segovia/
  * Author Email:    xavier.gimenez.segovia@gmail.com
- * Version:         1.0.2
+ * Version:         1.0.3
  * Depends:         BuddyPress
  * Text Domain:     furiagamingcommunity_games
  * License:         GPLv2 or later (LICENSE)
@@ -43,11 +43,15 @@ class FuriaGamingCommunity_Games {
 
 		// Only run these methods if they haven't been run previously
 		if ( null === $instance ) {
+			
+			// Setup plugin object.
 			$instance = new FuriaGamingCommunity_Games;
+			
+			// Setup plugin dependencies
 			$instance->constants();
 			$instance->setup_globals();
 			$instance->includes();
-			$instance->setup_classes();
+			$instance->classes();
 		}
 
 		// Always return the instance
@@ -55,7 +59,7 @@ class FuriaGamingCommunity_Games {
 	}
 
 	/**
-	 * A dummy constructor to prevent FuriaGamingCommunity_Games from being loaded more than once..
+	 * A dummy constructor to prevent FuriaGamingCommunity_Games from being loaded more than once.
 	 * @since 1.0.1
 	 */
 	private function __construct() { /* Do nothing here */ }
@@ -110,7 +114,7 @@ class FuriaGamingCommunity_Games {
 	 *
 	 * @since 1.0.2
 	 */
-	private function setup_classes() {
+	private function classes() {
 
 		$this->games          = new Games();
 	}

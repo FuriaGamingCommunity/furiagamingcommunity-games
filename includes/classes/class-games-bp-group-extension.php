@@ -59,7 +59,7 @@ if ( class_exists( 'BP_Group_Extension' ) && !class_exists( 'FuriaGamingCommunit
 
 			<?php $type = get_term_type_by_slug( $group_game_type ); ?>
 
-			<p><?php printf( __( 'This group is an official %1$s of %2$s.', 'furiagamingcommunity_games' ), $type->name, get_bloginfo( 'name' ) ); ?><p>
+			<p><?php printf( __( 'This group is a %1$s of %2$s.', 'furiagamingcommunity_games' ), get_term_permalink( $type, 'game-types' ), get_bloginfo( 'name' ) ); ?><p>
 
 			<?php endif; ?>
 

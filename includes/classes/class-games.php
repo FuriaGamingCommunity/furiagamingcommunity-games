@@ -13,11 +13,16 @@ defined( 'ABSPATH' ) || exit;
  * Games contain several taxonomies to display related in-game characters features.
  *
  * @author Xavier Giménez Segovia
- * @version 1.0.1
+ * @version 1.1.0
  */
 if ( !class_exists('Games') ) :
 
 class Games {
+
+	/**
+	 * Holds the values to be used in callbacks
+	 */
+	private $options;
 
 	/**
 	 * Build the class.
@@ -35,25 +40,24 @@ class Games {
 	public function setup_actions() {
 
 		// Add universal actions
-		add_action( 'init'							, array( $this , 'register_games' 			) );
-		add_action( 'init'							, array( $this , 'register_races' 			) );
-		add_action( 'init'							, array( $this , 'register_classes' 		) );
-		add_action( 'init'							, array( $this , 'register_roles' 			) );
-		add_action( 'init'							, array( $this , 'register_types' 			) );
+		add_action( 'init'	, array( $this , 'register_games' ) 	);
+		add_action( 'init'	, array( $this , 'register_races' ) 	);
+		add_action( 'init'	, array( $this , 'register_classes' ) 	);
+		add_action( 'init'	, array( $this , 'register_roles' ) 	);
+		add_action( 'init'	, array( $this , 'register_types' ) 	);
+		add_action( 'init'	, array( $this , 'register_settings' ) 	);
 		
 		// Add universal filters
-		add_filter( 'bp_notifications_get_registered_components' 
-													, array( $this , 'register_notification' ) 	, 9 , 1 );
-		add_filter( 'bp_notifications_get_notifications_for_user' 
-													, array( $this , 'format_notification' ) 	, 9 , 5 );
+		add_filter( 'bp_notifications_get_registered_components'	, array( $this , 'register_notification' ) 	, 9 , 1 );
+		add_filter( 'bp_notifications_get_notifications_for_user'	, array( $this , 'format_notification' ) 	, 9 , 5 );
 
 		// Admin-only methods
 		if ( is_admin() ) {
 
 			// Admin Filters
-			add_filter( 'post_updated_messages'				, array( $this , 'update_messages' )				);
-			add_filter( 'manage_edit-game_columns'			, array( $this , 'edit_game_columns' )				);
-
+			add_filter( 'post_updated_messages'		, array( $this , 'update_messages' 	)	);
+			add_filter( 'manage_edit-game_columns'	, array( $this , 'edit_game_columns' )	);
+			
 			// Admin Actions
 			add_action( 'save_post'							, array( $this , 'save_game' )				, 10, 2 );
 			add_action( 'edited_race'						, array( $this , 'save_race' )				, 10, 2 );
@@ -65,6 +69,10 @@ class Games {
 			add_action( 'edited_type'						, array( $this , 'save_type' )				, 10, 2 );
 			add_action( 'create_type'						, array( $this , 'save_type' )				, 10, 2 );
 			add_action( 'manage_game_posts_custom_column'	, array( $this , 'manage_game_columns' )	, 10, 2	);
+
+			// Settings
+			add_action( 'admin_menu'						, array( $this, 'add_plugin_page' ) 				);
+			add_action( 'admin_init'						, array( $this, 'page_init' ) 						);
 		}
 	}
 	
@@ -313,6 +321,18 @@ class Games {
 	}
 
 	/**
+	 * Add default values for game settings.
+	 * @since 1.0.0
+	 */
+	public function register_settings() {
+		
+		if ( !isset($this->options['dedicated']) )
+			$this->options['dedicated'] = '';
+		if ( !isset($this->options['semi_dedicated']) )
+			$this->options['semi_dedicated'] = '';
+	}
+
+	/**
 	 * Customize backend messages when an event is updated.
 	 * @since 1.0.0
 	 */
@@ -471,6 +491,143 @@ class Games {
 				}
 			break;
 		}
+	}
+
+	/**
+	 * Game Settings
+	 */
+
+	/**
+	 * Add options page
+	 * @since 1.1.0
+	 */
+	public function add_plugin_page() {
+		// This page will be under "Settings"
+		add_options_page(
+			__('Games Settings', 'furiagamingcommunity_games'), 
+			__('Games', 'furiagamingcommunity_games'), 
+			'manage_options', 
+			'games-admin', 
+			array( $this, 'create_admin_page' )
+			);
+	}
+
+	/**
+	 * Options page callback
+	 * @since 1.1.0
+	 */
+	public function create_admin_page() {
+		// Set class property
+		$this->options = get_option( 'games_option' );
+		?>
+		<div class="wrap">
+			<h2><?php _e('Games Settings', 'furiagamingcommunity_games'); ?></h2>
+			<p><?php _e('Here you can change the default settings for any game.', 'furiagamingcommunity_games'); ?></p>
+			<form method="post" action="options.php">
+				<?php
+				// This prints out all hidden setting fields
+				settings_fields( 'games_group' );   
+				do_settings_sections( 'games-admin' );
+				submit_button(); 
+				?>
+			</form>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Register and add settings
+	 * @since 1.1.0
+	 */
+	public function page_init() {        
+		register_setting(
+			'games_group', // Option group
+			'games_option', // Option name
+			array( $this, 'sanitize' ) // Sanitize
+			);
+
+		add_settings_section(
+			'games_dedicated_groups', // ID
+			__('Game Type Settings', 'furiagamingcommunity_games'), // Title
+			array( $this, 'games_dedicated_groups_info' ), // Callback
+			'games-admin' // Page
+			);  
+
+		add_settings_field(
+			'dedicated', // ID
+			__('Dedicated', 'furiagamingcommunity_games'), // Title 
+			array( $this, 'dedicated_callback' ), // Callback
+			'games-admin', // Page
+			'games_dedicated_groups' // Section
+			);      
+
+		add_settings_field(
+			'semi_dedicated', // ID
+			__('Semi-dedicated', 'furiagamingcommunity_games'), // Title 
+			array( $this, 'semi_dedicated_callback' ), // Callback
+			'games-admin', // Page
+			'games_dedicated_groups' // Section
+			);      
+	}
+
+	/**
+	 * Sanitize each setting field as needed
+	 * @since 1.1.0
+	 * @param array $input Contains all settings fields as array keys
+	 */
+	public function sanitize( $input ) {
+		$new_input = array();
+		if( isset( $input['dedicated'] ) )
+			$new_input['dedicated'] = absint( $input['dedicated'] );
+
+		if( isset( $input['semi_dedicated'] ) )
+			$new_input['semi_dedicated'] = absint( $input['semi_dedicated'] );
+
+		return $new_input;
+	}
+
+	/** 
+	 * Print the Section text
+	 * @since 1.1.0
+	 */
+	public function games_dedicated_groups_info() {
+		_e('Sets the selected game type as the default <strong>dedicated</strong> or <strong>semi-dedicated</strong> nomenclature for game groups.', 'furiagamingcommunity_games');
+	}
+
+	/** 
+	 * Get the settings option array and print one of its values
+	 * @since 1.1.0
+	 */
+	public function dedicated_callback() {
+		
+		// Get all game types
+		$types = get_terms_types();
+		?>
+		<select name="games_option[dedicated]" id="dedicated" aria-required="true" <?php disabled( empty( $types ), true ); ?> >
+			<option value="" default><?php _e( 'None', 'furiagamingcommunity_games' ); ?></option>
+			<?php if ( !empty( $types ) ) : foreach( $types as $type ) : ?>
+				<option value="<?php echo strtolower( $type->slug ); ?>" id="<?php echo 'game-type-' . $type->term_id; ?>" <?php selected( $this->options['dedicated'], $type->slug ); ?> ><?php echo $type->name; ?></option>
+			<?php endforeach; endif; ?>
+		</select>
+		<?php
+	}
+
+	/** 
+	 * Get the settings option array and print one of its values
+	 * @since 1.1.0
+	 */
+	public function semi_dedicated_callback() {
+		
+		// Get all game types
+		$types = get_terms_types();
+		?>
+		<select name="games_option[semi_dedicated]" id="semi_dedicated" aria-required="true" <?php disabled( empty( $types ), true ); ?> >
+			<option value="" default><?php _e( 'None', 'furiagamingcommunity_games' ); ?></option>
+			<?php if ( !empty( $types ) ) : foreach( $types as $type ) : ?>
+				<option value="<?php echo strtolower( $type->slug ); ?>" id="<?php echo 'game-type-' . $type->term_id; ?>" <?php selected( $this->options['semi_dedicated'], $type->slug ); ?> ><?php echo $type->name; ?></option>
+			<?php endforeach; endif; ?>
+		</select>
+		<?php
 	}
 	
 } // class Games

@@ -6,7 +6,7 @@
  *
  * @package  FuriaGamingCommunity
  * @subpackage FuriaGamingCommunity_Games
- * @author Xavier Giménez Segovia <xavier.gimenez.segovia@gmail.com>
+ * @author Xavier Giménez <xavier.gimenez.segovia@gmail.com>
  * @license GPL-2.0+
  **/
 
@@ -14,7 +14,7 @@
  * Plugin Name:     Furia Gaming Community - Games
  * Plugin URI:      https://github.com/nottu2584/furiagamingcommunity-games
  * Description:     Sets a new post type named slides and adds a custom widget to display them into slideshows.
- * Author:          Xavier Giménez Segovia
+ * Author:          Xavier Giménez
  * Author URI:      https://es.linkedin.com/pub/javier-gimenez-segovia/
  * Author Email:    xavier.gimenez.segovia@gmail.com
  * Version:         1.0.3
@@ -31,7 +31,7 @@ if ( !class_exists('FuriaGamingCommunity_Games') ) :
 /**
  * Inits the plugin dependencies.
  *
- * @author Xavier Giménez Segovia
+ * @author Xavier Giménez
  * @version 1.0.1
  */
 class FuriaGamingCommunity_Games {
@@ -60,14 +60,14 @@ class FuriaGamingCommunity_Games {
 
 	/**
 	 * A dummy constructor to prevent FuriaGamingCommunity_Games from being loaded more than once.
-	 * @since 1.0.1
+	 * @since 1.0.0
 	 */
 	private function __construct() { /* Do nothing here */ }
 
 	/**
 	 * Bootstrap constants.
 	 *
-	 * @since 1.0.1
+	 * @since 1.0.0
 	 *
 	 * @uses plugin_dir_path()
 	 * @uses plugin_dir_url()
@@ -85,7 +85,7 @@ class FuriaGamingCommunity_Games {
 	/**
 	 * Declare class constants.
 	 *
-	 * @since 1.0.1
+	 * @since 1.0.0
 	 */
 	private function setup_globals() {
 
@@ -99,7 +99,7 @@ class FuriaGamingCommunity_Games {
 	/**
 	 * Include required files.
 	 *
-	 * @since 1.0.1
+	 * @since 1.0.0
 	 */
 	private function includes() {
 
@@ -112,7 +112,7 @@ class FuriaGamingCommunity_Games {
 	/**
 	 * Setup classes.
 	 *
-	 * @since 1.0.2
+	 * @since 1.0.0
 	 */
 	private function classes() {
 
@@ -124,7 +124,7 @@ class FuriaGamingCommunity_Games {
 
 /**
  * Launch a single instance of the plugin
- * @since 1.0.2
+ * @since 1.0.0
  * 
  * @return FuriaGamingCommunity_Games The plugin instance
  */

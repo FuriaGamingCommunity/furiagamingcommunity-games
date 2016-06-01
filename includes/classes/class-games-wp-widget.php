@@ -1,9 +1,8 @@
 <?php
 /**
- * Furia Gaming Community BuddyPress Group Extension Game Class.
+ * Plugin Widgets.
  *
  * @uses WP_Widget
- * @since 1.1.0
  */
 
 // Exit if accessed directly
@@ -19,7 +18,7 @@ if ( class_exists( 'WP_Widget' ) && !class_exists('FuriaGamingCommunity_Games_Wi
  * Registers the Played Games widget.
  * Uses the "Games" custom post and taxonomies.
  *
- * @author Xavier Giménez Segovia
+ * @author Xavier Giménez
  * @version 1.0.0
  */
 class FuriaGamingCommunity_Games_Widget extends WP_Widget {
@@ -83,7 +82,6 @@ class FuriaGamingCommunity_Games_Widget extends WP_Widget {
 		
 		// The Loop.
 		if ( $game_loop->have_posts() ) : while ( $game_loop->have_posts() ) : $game_loop->the_post();
-
 
 		// End the loop.
 		endwhile; 

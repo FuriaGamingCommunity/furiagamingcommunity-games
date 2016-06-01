@@ -1,10 +1,18 @@
 <?php
-
 /** 
  * Plugin functions.
- *
- * General plugin functions and helpers for the game post type.
  */
+
+/**
+ * Helper function to check if the current post is a game.
+ * @since 1.0.0
+ *
+ * @param int|string|array $post Post ID, title, slug, or array of such.
+ * @return bool Returns true if the selected race taxonomy is inside the queried post.
+ */
+function is_game( $post ) {
+	return is_single( $post );
+}
 
 /**
  * Helper function to set context on game race
@@ -31,7 +39,7 @@ function is_game_class() {
 }
 
 /**
- * Helper function to set context on game class
+ * Helper function to set context on game role
  * @since 1.0.0
  *
  * @return bool Returns true if the selected role taxonomy is inside the queried post.
@@ -43,10 +51,10 @@ function is_game_role() {
 }
 
 /**
- * Helper function to set context on game class
+ * Helper function to set context on game type
  * @since 1.0.0
  *
- * @return bool Returns true if the selected role taxonomy is inside the queried post.
+ * @return bool Returns true if the selected type taxonomy is inside the queried post.
  */
 function is_game_type() {
 	global $wp_query;
@@ -72,7 +80,7 @@ function get_games() {
 
 /**
  * Get all races terms
- * @since 1.1.0
+ * @since 1.0.0
  *
  * @return array List of terms under game-races.
  */
@@ -82,7 +90,7 @@ function get_terms_races() {
 
 /**
  * Get all classes terms
- * @since 1.1.0
+ * @since 1.0.0
  *
  * @return array List of terms under game-classes.
  */
@@ -92,7 +100,7 @@ function get_terms_classes() {
 
 /**
  * Get all roles terms
- * @since 1.1.0
+ * @since 1.0.0
  *
  * @return array List of terms under game-roles.
  */
@@ -102,7 +110,7 @@ function get_terms_roles() {
 
 /**
  * Get all types terms
- * @since 1.1.0
+ * @since 1.0.0
  *
  * @return array List of terms under game-types.
  */
@@ -135,7 +143,7 @@ function get_game_by_slug( $slug ) {
 
 /**
  * Get a single term from game races by the slug
- * @since 1.1.0
+ * @since 1.0.0
  *
  * @param string $slug Term slug to look after.
  * @return WP_Term|bool Returns the term object.
@@ -149,7 +157,7 @@ function get_term_race_by_slug( $slug ) {
 
 /**
  * Get a single term from game classes by the slug
- * @since 1.1.0
+ * @since 1.0.0
  *
  * @param string $slug Term slug to look after.
  * @return WP_Term|bool Returns the term object.
@@ -163,7 +171,7 @@ function get_term_class_by_slug( $slug ) {
 
 /**
  * Get a single term from game roles by the slug
- * @since 1.1.0
+ * @since 1.0.0
  *
  * @param string $slug Term slug to look after.
  * @return WP_Term|bool Returns the term object.
@@ -177,7 +185,7 @@ function get_term_role_by_slug( $slug ) {
 
 /**
  * Get a single term from game types by the slug
- * @since 1.1.0
+ * @since 1.0.0
  *
  * @param string $slug Term slug to look after.
  * @return WP_Term|bool Returns the term object.
@@ -190,52 +198,8 @@ function get_term_type_by_slug( $slug ) {
 }
 
 /**
- * Get game races
- * @since 1.0.0
- *
- * @param int $post_id The post ID.
- * @return array List of post terms under game races.
- */
-function get_game_races( $post_id ) {
-	return wp_get_post_terms( $post_id, 'game-races' );
-}
-
-/**
- * Get game classes
- * @since 1.0.0
- *
- * @param int $post_id The post ID.
- * @return array List of post terms under game classes.
- */
-function get_game_classes( $post_id ) {
-	return wp_get_post_terms( $post_id, 'game-classes' );
-}
-
-/**
- * Get game roles
- * @since 1.0.0
- *
- * @param int $post_id The post ID.
- * @return array List of post terms under game roles.
- */
-function get_game_roles( $post_id ) {
-	return wp_get_post_terms( $post_id, 'game-roles' );
-}
-
-/**
- * Get game types
- * @since 1.1.0
- *
- * @param int $post_id The post ID.
- * @return array List of post terms under game types.
- */
-function get_game_types( $post_id ) {
-	return wp_get_post_terms( $post_id, 'game-types' );
-}
-
-/**
  * Generate a formatted tag permalink
- * @since 1.2.0
+ * @since 1.0.0
  *
  * @param int|WP_Term $term The term ID or the term object.
  * @param string $taxonomy The taxonomy name.
@@ -270,8 +234,62 @@ function get_term_permalink( $term, $taxonomy ) {
 }
 
 /**
+ * Get game races
+ * @since 1.0.0
+ *
+ * @param int $post_id Post ID.
+ * @return array List of post terms under game races.
+ */
+function get_game_races( $post_id ) {
+	return wp_get_post_terms( $post_id, 'game-races' );
+}
+
+/**
+ * Get game classes
+ * @since 1.0.0
+ *
+ * @param int $post_id Post ID.
+ * @return array List of post terms under game classes.
+ */
+function get_game_classes( $post_id ) {
+	return wp_get_post_terms( $post_id, 'game-classes' );
+}
+
+/**
+ * Get game roles
+ * @since 1.0.0
+ *
+ * @param int $post_id Post ID.
+ * @return array List of post terms under game roles.
+ */
+function get_game_roles( $post_id ) {
+	return wp_get_post_terms( $post_id, 'game-roles' );
+}
+
+/**
+ * Get game types
+ * @since 1.0.0
+ *
+ * @param int $post_id Post ID.
+ * @return array List of post terms under game types.
+ */
+function get_game_types( $post_id ) {
+	return wp_get_post_terms( $post_id, 'game-types' );
+}
+
+/**
+ * Get game options
+ * @since 1.0.0
+ *
+ * @return array List of post terms under game types.
+ */
+function get_game_options() {
+	return get_option( 'game_option' );
+}
+
+/**
  * Get a specified game race term permalink.
- * @since 1.2.0
+ * @since 1.0.0
  * 
  * @param int|WP_Term $term The term ID or the term object.
  */
@@ -281,7 +299,7 @@ function get_game_races_permalink( $term ) {
 
 /**
  * Get a specified game class term permalink.
- * @since 1.2.0
+ * @since 1.0.0
  * 
  * @param int|WP_Term $term The term ID or the term object.
  */
@@ -291,7 +309,7 @@ function get_game_classes_permalink( $term ) {
 
 /**
  * Get a specified game role term permalink.
- * @since 1.2.0
+ * @since 1.0.0
  * 
  * @param int|WP_Term $term The term ID or the term object.
  */
@@ -301,7 +319,7 @@ function get_game_roles_permalink( $term ) {
 
 /**
  * Get a specified game type term permalink.
- * @since 1.2.0
+ * @since 1.0.0
  * 
  * @param int|WP_Term $term The term ID or the term object.
  */
@@ -314,18 +332,18 @@ function get_game_types_permalink( $term ) {
  */
 
 function admin_notices_bp_groups_missing() {	
-	echo '<div class="notice-warning">' . sprintf( __( 'The Game Group extension needs <strong><a href="%1$s">BuddyPress</a> <em>Groups</em></strong> extension enabled in order to function correctly.', 'furiagamingcommunity_games'), admin_url('options-general.php?page=bp-components') ) . '</div>';
+	echo '<div class="notice-warning">' . sprintf( __( 'Game Group extension needs <strong><a href="%1$s">BuddyPress</a> <em>Groups</em></strong> extension enabled in order to function correctly.', 'furiagamingcommunity_games'), admin_url('options-general.php?page=bp-components') ) . '</div>';
 }
 
-function admin_notices_game_type_not_set( $message ) {	
-	echo '<div class="notice-error">' . sprintf( __( 'An error occurred while adding the selected game group type: %1$s', 'furiagamingcommunity_games'), $message ) . '</div>';
+function admin_notices_game_type_not_set() {	
+	echo '<div class="notice-error">' . __( 'An error occurred while adding the selected game group type.', 'furiagamingcommunity_games') . '</div>';
 }
 
-function admin_notices_term_not_found( $message ) {
-	echo '<div class="notice-error">' . sprintf( __( 'An error occurred while retrieving the term: %1$s', 'furiagamingcommunity_games'), $message ) . '</div>';
+function admin_notices_term_not_found() {
+	echo '<div class="notice-error">' . __( 'An error occurred while retrieving the term.', 'furiagamingcommunity_games') . '</div>';
 }
 
-function admin_notices_tag_permalink_not_found( $message ) {
-	echo '<div class="notice-error">' . sprintf( __( 'An error occurred while retrieving the term permalink: %1$s', 'furiagamingcommunity_games'), $message ) . '</div>';
+function admin_notices_tag_permalink_not_found() {
+	echo '<div class="notice-error">' . __( 'An error occurred while retrieving the term permalink.', 'furiagamingcommunity_games') . '</div>';
 }
 ?>

@@ -1,22 +1,19 @@
 <?php
 /**
- * Furia Gaming Community Game Class.
- *
- * @since 1.0.2
+ * Plugin Game Class.
  */
 
 // Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
 
+if ( !class_exists('Games') ) :
 /**
  * Registers the "Game" custom post type.
  * Games contain several taxonomies to display related in-game characters features.
  *
- * @author Xavier Giménez Segovia
- * @version 1.1.0
+ * @author Xavier Giménez
+ * @version 1.1.1
  */
-if ( !class_exists('Games') ) :
-
 class Games {
 
 	/**
@@ -26,7 +23,7 @@ class Games {
 
 	/**
 	 * Build the class.
-	 * @since 1.0.1
+	 * @since 1.0.0
 	 */
 	public function __construct() {
 
@@ -68,7 +65,8 @@ class Games {
 			add_action( 'create_role'						, array( $this , 'save_role' )				, 10, 2 );
 			add_action( 'edited_type'						, array( $this , 'save_type' )				, 10, 2 );
 			add_action( 'create_type'						, array( $this , 'save_type' )				, 10, 2 );
-			add_action( 'manage_game_posts_custom_column'	, array( $this , 'manage_game_columns' )	, 10, 2	);
+			add_action( 'do_meta_boxes'						, array( $this , 'do_game_logo_box' )		, 10, 2	);	
+			add_action( 'manage_posts_custom_column'		, array( $this , 'manage_game_columns' )	, 10, 2	);
 
 			// Settings
 			add_action( 'admin_menu'						, array( $this, 'add_plugin_page' ) 				);
@@ -123,7 +121,7 @@ class Games {
 			'capabilities'			=> $game_capabilities,
 			'map_meta_cap'			=> true,
 			'hierarchical'			=> false,
-			'supports'				=> array( 'title', 'editor' ),
+			'supports'				=> array( 'title', 'editor', 'thumbnail', 'excerpt' ),
 			'taxonomies'			=> array( 'game-races' , 'game-classes', 'game-roles', 'game-types' ),
 			'has_archive'			=> false,
 			'rewrite'				=> array(
@@ -362,7 +360,7 @@ class Games {
 	}
 
 	/**
-	 * Save or update a new event
+	 * Save or update a new game.
 	 * @since 1.0.0
 	 */
 	public function save_game( $post_id , $post = '' ) {
@@ -412,7 +410,7 @@ class Games {
 
 	/**
 	 * Save custom type taxonomy.
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 */
 	public function save_type( $term_id ) {
 		
@@ -424,7 +422,7 @@ class Games {
 	}
 
 	/**
-	 * Register "games" as a valid notification type
+	 * Register games as a valid notification type
 	 * @since 1.0.0
 	 */	
 	public function register_notification( $names ) {
@@ -433,7 +431,7 @@ class Games {
 	}
 	
 	/**
-	 * Format the text for race event notifications
+	 * Format the text for game events notifications
 	 * @since 1.0.0
 	 */		
 	public function format_notification( $action, $item_id, $secondary_item_id, $total_items , $format = 'string' ) {
@@ -441,7 +439,16 @@ class Games {
 	}
 
 	/**
-	 * Adds the slide featured image and link to the slides page
+	 * Place the logo box in the main listing, since it's a key element here.
+	 * @since 1.1.1
+	 */
+	public function do_game_logo_box() {
+		remove_meta_box( 'postimagediv', 'game', 'side' );
+		add_meta_box( 'postimagediv', __('Set the game logo', 'furiagamingcommunity_games'), 'post_thumbnail_meta_box' , 'game', 'normal', 'high' );
+	}
+
+	/**
+	 * Edits the display of the game list columns
 	 * @since 1.0.0
 	 */
 	public function edit_game_columns( $columns ) {
@@ -455,7 +462,7 @@ class Games {
 	}
 	
 	/**
-	 * Adds content to the custom column format
+	 * Manages the display of the game list custom columns
 	 * @since 1.0.0
 	 */
 	public function manage_game_columns( $columns ) {
@@ -499,7 +506,7 @@ class Games {
 
 	/**
 	 * Add options page
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 */
 	public function add_plugin_page() {
 		// This page will be under "Settings"
@@ -514,7 +521,7 @@ class Games {
 
 	/**
 	 * Options page callback
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 */
 	public function create_admin_page() {
 		// Set class property
@@ -537,7 +544,7 @@ class Games {
 
 	/**
 	 * Register and add settings
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 */
 	public function page_init() {        
 		register_setting(
@@ -547,9 +554,9 @@ class Games {
 			);
 
 		add_settings_section(
-			'games_dedicated_groups', // ID
+			'games_group_types', // ID
 			__('Game Type Settings', 'furiagamingcommunity_games'), // Title
-			array( $this, 'games_dedicated_groups_info' ), // Callback
+			array( $this, 'games_group_types_info' ), // Callback
 			'games-admin' // Page
 			);  
 
@@ -558,7 +565,7 @@ class Games {
 			__('Dedicated', 'furiagamingcommunity_games'), // Title 
 			array( $this, 'dedicated_callback' ), // Callback
 			'games-admin', // Page
-			'games_dedicated_groups' // Section
+			'games_group_types' // Section
 			);      
 
 		add_settings_field(
@@ -566,37 +573,37 @@ class Games {
 			__('Semi-dedicated', 'furiagamingcommunity_games'), // Title 
 			array( $this, 'semi_dedicated_callback' ), // Callback
 			'games-admin', // Page
-			'games_dedicated_groups' // Section
+			'games_group_types' // Section
 			);      
 	}
 
 	/**
 	 * Sanitize each setting field as needed
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 * @param array $input Contains all settings fields as array keys
 	 */
 	public function sanitize( $input ) {
 		$new_input = array();
 		if( isset( $input['dedicated'] ) )
-			$new_input['dedicated'] = absint( $input['dedicated'] );
+			$new_input['dedicated'] = sanitize_text_field( $input['dedicated'] );
 
 		if( isset( $input['semi_dedicated'] ) )
-			$new_input['semi_dedicated'] = absint( $input['semi_dedicated'] );
+			$new_input['semi_dedicated'] = sanitize_text_field( $input['semi_dedicated'] );
 
 		return $new_input;
 	}
 
 	/** 
 	 * Print the Section text
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 */
-	public function games_dedicated_groups_info() {
+	public function games_group_types_info() {
 		_e('Sets the selected game type as the default <strong>dedicated</strong> or <strong>semi-dedicated</strong> nomenclature for game groups.', 'furiagamingcommunity_games');
 	}
 
 	/** 
 	 * Get the settings option array and print one of its values
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 */
 	public function dedicated_callback() {
 		
@@ -614,7 +621,7 @@ class Games {
 
 	/** 
 	 * Get the settings option array and print one of its values
-	 * @since 1.1.0
+	 * @since 1.0.0
 	 */
 	public function semi_dedicated_callback() {
 		

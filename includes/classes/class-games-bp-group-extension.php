@@ -153,8 +153,8 @@ if ( class_exists( 'BP_Group_Extension' ) && !class_exists( 'FuriaGamingCommunit
 					$term_taxonomy_ids = wp_set_object_terms( $game->ID, $type->term_id, 'game-types', true );
 
 					if ( is_wp_error( $term_taxonomy_ids ) ) {
-						if ( is_admin() ) add_action( 'admin_notices', 'admin_notices_not_set_game_type' );
-						else bp_core_add_message( message_not_set_game_type( $type ), 'error' );
+						if ( is_admin() ) add_action( 'admin_notices', 'admin_notices_missing_game_type' );
+						else bp_core_add_message( message_missing_game_type( $type ), 'error' );
 					} else {
 						// Context message.
 						bp_core_add_message( __( '<em>Game</em> group type was updated successfully.',  'furiagamingcommunity_games' ) );

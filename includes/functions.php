@@ -63,6 +63,61 @@ function is_game_type() {
 }
 
 /**
+ * Helper function to set context on game type
+ * @since 1.1.0
+ *
+ * @return bool Returns true if the selected type taxonomy is inside the queried post.
+ */
+function is_game_group() {
+	if ( class_exists( 'BP_Group_Extension' ) ) {
+
+		// Check for group page.
+		if ( bp_is_groups() ) {
+
+			$group_game = groups_get_groupmeta( bp_get_group_id(), 'group-game' );
+
+			// Check if group meta was set correctly.
+			if ( $group_game ) {
+
+				$game = get_game_by_slug( $group_game );
+
+				// Check if the given meta is a game.
+				if ( is_game( $game) ) {
+					return true;
+				} else {
+
+					// Group game is no longer valid, so we try to unset it.
+					if ( !groups_delete_groupmeta( bp_get_group_id(), 'group-game', $group_game ) )
+						return new WP_Error( 'invalid_bp_groups_groupmeta_groupgame', message_invalid_bp_groups_groupmeta_groupgame() );
+					else
+						// Already unset(?)
+						return false;
+				}
+			} else {
+				// No game set.
+				return false;
+			}
+
+		} else {
+			// Not a group.
+			return false;
+		}
+
+	} else {
+
+		// Add an admin message.
+		if ( is_admin() && !class_exists( 'BP_Group_Extension' ) )
+			add_action( 'admin_notices', 'admin_notices_missing_bp_groups' );
+		// Add a BuddyPress message.
+		if ( is_buddypress() )
+			bp_core_add_message( message_missing_bp_groups(), 'error' );
+
+		// Return instead a WP_Error object.
+		return new WP_Error( 'missing_bp_groups', message_missing_bp_groups() );
+	}
+}
+
+/**
  * Get all games
  * @since 1.0.0
  *
@@ -213,9 +268,9 @@ function get_term_permalink( $term, $taxonomy ) {
 	// Check if the term could not be retrieved.
 	if ( is_wp_error( $term ) ) {
 		if ( is_admin() ) {
-			admin_notices_term_not_found( $result->get_error_message(), 'error is-dismissible' );
-		} elseif ( !bp_is_blog_page() ) {
-			bp_core_add_message( sprintf( __( 'An error occurred while retrieving the term: %1$s',  'furiagamingcommunity_games' ), $term->get_error_message() ), 'error' );
+			admin_notices_missing_term( $result->get_error_message(), 'error is-dismissible' );
+		} elseif ( is_buddypress() ) {
+			bp_core_add_message( admin_notices_missing_term(), 'error' );
 		} return false;
 	}
 
@@ -225,9 +280,9 @@ function get_term_permalink( $term, $taxonomy ) {
 	// Check if the term link could not be retrieved.
 	if ( is_wp_error( $result ) ) {
 		if ( is_admin() ) {
-			admin_notices_tag_permalink_not_found( $result->get_error_message(), 'error is-dismissible' );
-		} elseif ( !bp_is_blog_page() ) {
-			bp_core_add_message( sprintf( __( 'An error occurred while retrieving the term permalink: %1$s',  'furiagamingcommunity_games' ), $result->get_error_message() ), 'error' );
+			admin_notices_missing_term_permalink( $result->get_error_message(), 'error is-dismissible' );
+		} elseif ( is_buddypress() ) {
+			bp_core_add_message( admin_notices_missing_term_permalink(), 'error' );
 		} return false;
 	} else
 		return '<a href="' . $result . '">' . $term->name . '</a>';
@@ -281,10 +336,10 @@ function get_game_types( $post_id ) {
  * Get game options
  * @since 1.0.0
  *
- * @return array List of post terms under game types.
+ * @return array|bool Array with all game options or FALSE if games_option was not set.
  */
 function get_game_options() {
-	return get_option( 'game_option' );
+	return get_option( 'games_option' );
 }
 
 /**
@@ -325,25 +380,5 @@ function get_game_roles_permalink( $term ) {
  */
 function get_game_types_permalink( $term ) {
 	get_term_permalink( $term, 'game-types' );
-}
-
-/**
- * Admin Messages
- */
-
-function admin_notices_bp_groups_missing() {	
-	echo '<div class="notice-warning">' . sprintf( __( 'Game Group extension needs <strong><a href="%1$s">BuddyPress</a> <em>Groups</em></strong> extension enabled in order to function correctly.', 'furiagamingcommunity_games'), admin_url('options-general.php?page=bp-components') ) . '</div>';
-}
-
-function admin_notices_game_type_not_set() {	
-	echo '<div class="notice-error">' . __( 'An error occurred while adding the selected game group type.', 'furiagamingcommunity_games') . '</div>';
-}
-
-function admin_notices_term_not_found() {
-	echo '<div class="notice-error">' . __( 'An error occurred while retrieving the term.', 'furiagamingcommunity_games') . '</div>';
-}
-
-function admin_notices_tag_permalink_not_found() {
-	echo '<div class="notice-error">' . __( 'An error occurred while retrieving the term permalink.', 'furiagamingcommunity_games') . '</div>';
 }
 ?>

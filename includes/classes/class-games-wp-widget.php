@@ -81,14 +81,12 @@ class FuriaGamingCommunity_Games_Widget extends WP_Widget {
 			) );
 		
 		// The Loop.
-		if ( $game_loop->have_posts() ) : while ( $game_loop->have_posts() ) : $game_loop->the_post();
-
-		// End the loop.
-		endwhile; 
-
-		else: 
-			if ( is_admin() ) furiagamingcommunity_games_notices( __('There are not any game to display.','furiagamingcommunity_games'), 'info' );
-		endif;
+		if ( $game_loop->have_posts() )
+			while ( $game_loop->have_posts() )
+				$game_loop->the_post();
+		else
+			if ( is_admin() )
+				add_action( 'admin_notices', 'admin_notices_missing_games' );
 
 		// Reset post data.
 		wp_reset_postdata();

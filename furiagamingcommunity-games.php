@@ -17,7 +17,7 @@
  * Author:          Xavier Giménez
  * Author URI:      https://es.linkedin.com/pub/javier-gimenez-segovia/
  * Author Email:    xavier.gimenez.segovia@gmail.com
- * Version:         1.0.3
+ * Version:         1.1.0
  * Depends:         BuddyPress
  * Text Domain:     furiagamingcommunity_games
  * License:         GPLv2 or later (LICENSE)
@@ -32,7 +32,7 @@ if ( !class_exists('FuriaGamingCommunity_Games') ) :
  * Inits the plugin dependencies.
  *
  * @author Xavier Giménez
- * @version 1.0.1
+ * @version 1.1.0
  */
 class FuriaGamingCommunity_Games {
 
@@ -104,6 +104,7 @@ class FuriaGamingCommunity_Games {
 	private function includes() {
 
 		require( $this->plugin_dir . 'includes/functions.php');
+		require( $this->plugin_dir . 'includes/messages.php');
 		require( $this->plugin_dir . 'includes/classes/class-games.php' );
 		require( $this->plugin_dir . 'includes/classes/class-games-bp-group-extension.php' );
 		require( $this->plugin_dir . 'includes/classes/class-games-wp-widget.php' );

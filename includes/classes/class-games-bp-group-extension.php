@@ -9,15 +9,22 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * The class_exists() check is recommended, to prevent problems during upgrade
- * or when the Groups component is disabled
+ * The class_exists() check is recommended, to prevent problems
+ * during upgrade or when the Groups component is disabled
  */
 if ( class_exists( 'BP_Group_Extension' ) && !class_exists( 'FuriaGamingCommunity_Games_BP_Group_Extension' ) ) {
 
+	/**
+	 * Extends usability of BuddyPress Groups to let their user 
+	 * administrators relate them to our games custom post type.
+	 *
+	 * @author Xavier Giménez
+ 	 * @version 1.1.0
+	 */
 	class FuriaGamingCommunity_Games_BP_Group_Extension extends BP_Group_Extension {
 		/**
-		 * Your __construct() method will contain configuration options for 
-		 * your extension, and will pass them to parent::init()
+		 * Your __construct() method will contain configuration options
+		 * for your extension, and will pass them to parent::init()
 		 */
 		function __construct() {
 			$args = array(
@@ -37,8 +44,6 @@ if ( class_exists( 'BP_Group_Extension' ) && !class_exists( 'FuriaGamingCommunit
 			// Get group game meta and game list
 			$group_game = groups_get_groupmeta( $group_id, 'group-game' );
 			$group_game_type = groups_get_groupmeta( $group_id, 'group-game-type' );
-
-			$games = get_games();
 			?>
 			
 			<?php if ( !$group_game ) : ?>
@@ -62,8 +67,6 @@ if ( class_exists( 'BP_Group_Extension' ) && !class_exists( 'FuriaGamingCommunit
 			<?php endif; ?>
 
 			<?php
-			$options = get_game_options();
-			var_dump($options);
 		}
 	 
 		/**
@@ -133,27 +136,29 @@ if ( class_exists( 'BP_Group_Extension' ) && !class_exists( 'FuriaGamingCommunit
 			$setting['group-game-type'] = '';
 
 			if ( !empty( $_POST['group-game'] ) ) {
-				$setting['group-game'] = absint( $_POST['group-game'] );
+				$setting['group-game'] = sanitize_text_field( $_POST['group-game'] );
 
 				groups_update_groupmeta( $group_id, 'group-game', $setting['group-game'] );
 			}
 
 			if ( !empty( $_POST['group-game-type'] ) ) { 
-				$setting['group-game-type'] = absint(  $_POST['group-game-type'] );
+				$setting['group-game-type'] = sanitize_text_field(  $_POST['group-game-type'] );
 
 				// Get game group and game group type.
 				$game = get_game_by_slug( $_POST['group-game'] );
 				$type = get_term_type_by_slug( $_POST['group-game-type'] );
 
 				// Attempt to add the game group type to the game object.
-				$term_taxonomy_ids = wp_set_object_terms( $game->ID, $type->term_id, 'game-types' );
+				if ( !has_term( $type, 'game-types', $game ) ) {
+					$term_taxonomy_ids = wp_set_object_terms( $game->ID, $type->term_id, 'game-types', true );
 
-				if ( is_wp_error( $term_taxonomy_ids ) ) {
-					if ( is_admin() ) add_action( 'admin_notices', 'admin_notices_game_type_not_set' );
-					else bp_core_add_message( sprintf( __( 'An error occurred while adding the selected game group type: %1$s',  'furiagamingcommunity_games' ), $type->slug ), 'error' );
-				} else {
-					// Context message.
-					bp_core_add_message( __( '<em>Game</em> group type was updated successfully.',  'furiagamingcommunity_games' ) );
+					if ( is_wp_error( $term_taxonomy_ids ) ) {
+						if ( is_admin() ) add_action( 'admin_notices', 'admin_notices_not_set_game_type' );
+						else bp_core_add_message( message_not_set_game_type( $type ), 'error' );
+					} else {
+						// Context message.
+						bp_core_add_message( __( '<em>Game</em> group type was updated successfully.',  'furiagamingcommunity_games' ) );
+					}
 				}
 
 				// Update the group meta.
@@ -171,6 +176,6 @@ if ( class_exists( 'BP_Group_Extension' ) && !class_exists( 'FuriaGamingCommunit
 
 	} else {
 		if ( is_admin() && !class_exists( 'BP_Group_Extension' ) )
-			add_action( 'admin_notices', 'admin_notices_bp_groups_missing' );
+			add_action( 'admin_notices', 'admin_notices_missing_bp_groups' );
 	}
 ?>

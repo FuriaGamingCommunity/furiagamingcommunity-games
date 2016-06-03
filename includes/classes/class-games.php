@@ -65,12 +65,11 @@ class Games {
 			add_action( 'create_role'						, array( $this , 'save_role' )				, 10, 2 );
 			add_action( 'edited_type'						, array( $this , 'save_type' )				, 10, 2 );
 			add_action( 'create_type'						, array( $this , 'save_type' )				, 10, 2 );
-			add_action( 'do_meta_boxes'						, array( $this , 'do_game_logo_box' )		, 10, 2	);	
+			add_action( 'admin_menu'						, array( $this , 'remove_game_meta_box' ) 	, 10, 2	);
+			add_action( 'admin_menu'						, array( $this , 'add_plugin_page' ) 		, 10, 2	);
+			add_action( 'admin_init'						, array( $this , 'page_init' ) 				, 10, 2	);
+			add_action( 'add_meta_boxes'					, array( $this , 'add_game_meta_box' ) 		, 10, 2	);
 			add_action( 'manage_posts_custom_column'		, array( $this , 'manage_game_columns' )	, 10, 2	);
-
-			// Settings
-			add_action( 'admin_menu'						, array( $this, 'add_plugin_page' ) 				);
-			add_action( 'admin_init'						, array( $this, 'page_init' ) 						);
 		}
 	}
 	
@@ -353,10 +352,55 @@ class Games {
 				__( 'Game scheduled for: <strong>%1$s</strong>.', 'furiagamingcommunity_games' ),
 				// translators: Publish box date format, see http://php.net/date
 				date_i18n( __( 'j M Y @ G:i', 'furiagamingcommunity_games' ), strtotime( $post->post_date ) )
-			),
+				),
 			10 => __( 'Game draft updated.', 'furiagamingcommunity_games' )
 			);
 		return $game_messages;
+	}
+
+	/**
+	 * Filters the default meta boxes.
+	 * @since 1.1.0
+	 * 
+	 */
+	public function remove_game_meta_box() {
+
+		// Remove default featured image box.
+		remove_meta_box( 'postimagediv', 'game', 'side' );
+	}
+
+	/**
+	 * Adds the game custom meta boxes.
+	 * @since 1.1.0
+	 * 
+	 */
+	public function add_game_meta_box() {
+		
+		// Add our customized featured image box.
+		add_meta_box( 'postimagediv', __('Game Logo', 'furiagamingcommunity_games'), 'post_thumbnail_meta_box' , 'game', 'normal', 'high' );
+
+		// Add the Game URL meta box.
+		add_meta_box( 'posturldiv', __( 'Game URL', 'furiagamingcommunity_games' ),	array( $this, 'game_url_meta_box' ), 'game', 'normal', 'high'	);
+	}
+
+	/**
+	 * Render game url meta box content.
+	 * @since 1.1.0
+	 *
+	 * @param WP_Post $post The post object.
+	 */
+	public function game_url_meta_box( $post ) {
+
+		// Add an nonce field so we can check for it later.
+		wp_nonce_field( 'game_url_meta_box', 'game_url_meta_box_nonce' );
+
+		// Use get_post_meta to retrieve an existing value from the database.
+		$url_value = get_post_meta( $post->ID, 'game_url', true );
+
+		// Display the form, using the current value.
+		?>
+		<input type="url" id="game_url" name="game_url" value="<?php echo esc_url( $url_value ); ?>" size="50" />
+		<?php
 	}
 
 	/**
@@ -367,6 +411,50 @@ class Games {
 		
 		// Don't do anything if it's not a game
 		if ( 'game' != $post->post_type ) return;
+
+        /*
+         * We need to verify this came from the our screen and with proper authorization,
+         * because save_post can be triggered at other times.
+         */
+ 
+        // Check if our nonce is set.
+        if ( ! isset( $_POST['game_url_meta_box_nonce'] ) ) {
+            return $post_id;
+        }
+ 
+        $nonce = $_POST['game_url_meta_box_nonce'];
+ 
+        // Verify that the nonce is valid.
+        if ( ! wp_verify_nonce( $nonce, 'game_url_meta_box' ) ) {
+            return $post_id;
+        }
+ 
+        /*
+         * If this is an autosave, our form has not been submitted,
+         * so we don't want to do anything.
+         */
+        if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+            return $post_id;
+        }
+ 
+        // Check the user's permissions.
+        if ( 'page' == $_POST['post_type'] ) {
+            if ( ! current_user_can( 'edit_page', $post_id ) ) {
+                return $post_id;
+            }
+        } else {
+            if ( ! current_user_can( 'edit_post', $post_id ) ) {
+                return $post_id;
+            }
+        }
+ 
+        /* OK, it's safe for us to save the data now. */
+ 
+        // Sanitize the user input.
+        $mydata = sanitize_text_field( $_POST['game_url'] );
+ 
+        // Update the meta field.
+        update_post_meta( $post_id, 'game_url', $mydata );
 	}
 
 	/**
@@ -439,15 +527,6 @@ class Games {
 	}
 
 	/**
-	 * Place the logo box in the main listing, since it's a key element here.
-	 * @since 1.1.1
-	 */
-	public function do_game_logo_box() {
-		remove_meta_box( 'postimagediv', 'game', 'side' );
-		add_meta_box( 'postimagediv', __('Set the game logo', 'furiagamingcommunity_games'), 'post_thumbnail_meta_box' , 'game', 'normal', 'high' );
-	}
-
-	/**
 	 * Edits the display of the game list columns
 	 * @since 1.0.0
 	 */
@@ -473,29 +552,29 @@ class Games {
 			
 			case 'type' :
 				// Get the types for the post.
-				$terms = get_the_terms( $post->ID, 'game-types' );
+			$terms = get_the_terms( $post->ID, 'game-types' );
 
 				// If terms were found.
-				if ( !empty( $terms ) ) {
+			if ( !empty( $terms ) ) {
 
-					$out = array();
+				$out = array();
 
 					// Loop through each term, linking to the 'edit posts' page for the specific term.
-					foreach ( $terms as $term ) {
-						$out[] = sprintf( '<a href="%s">%s</a>',
-							esc_url( add_query_arg( array( 'post_type' => $post->post_type, 'type' => $term->slug ), 'edit.php' ) ),
-							esc_html( sanitize_term_field( 'name', $term->name, $term->term_id, 'type', 'display' ) )
+				foreach ( $terms as $term ) {
+					$out[] = sprintf( '<a href="%s">%s</a>',
+						esc_url( add_query_arg( array( 'post_type' => $post->post_type, 'type' => $term->slug ), 'edit.php' ) ),
+						esc_html( sanitize_term_field( 'name', $term->name, $term->term_id, 'type', 'display' ) )
 						);
-					}
+				}
 
 					// Join the terms, separating them with a comma.
-					echo join( ', ', $out );
-				}
+				echo join( ', ', $out );
+			}
 
 				// If no terms were found, output a default message.
-				else {
-					_e( 'None', 'furiagamingcommunity_games' );
-				}
+			else {
+				_e( 'None', 'furiagamingcommunity_games' );
+			}
 			break;
 		}
 	}
@@ -613,11 +692,11 @@ class Games {
 		<select name="games_option[dedicated]" id="dedicated" aria-required="true" <?php disabled( empty( $types ), true ); ?> >
 			<option value="" default><?php _e( 'None', 'furiagamingcommunity_games' ); ?></option>
 			<?php if ( !empty( $types ) ) : foreach( $types as $type ) : ?>
-				<option value="<?php echo strtolower( $type->slug ); ?>" id="<?php echo 'game-type-' . $type->term_id; ?>" <?php selected( $this->options['dedicated'], $type->slug ); ?> ><?php echo $type->name; ?></option>
-			<?php endforeach; endif; ?>
-		</select>
-		<?php
-	}
+			<option value="<?php echo strtolower( $type->slug ); ?>" id="<?php echo 'game-type-' . $type->term_id; ?>" <?php selected( $this->options['dedicated'], $type->slug ); ?> ><?php echo $type->name; ?></option>
+		<?php endforeach; endif; ?>
+	</select>
+	<?php
+}
 
 	/** 
 	 * Get the settings option array and print one of its values
@@ -631,12 +710,12 @@ class Games {
 		<select name="games_option[semi_dedicated]" id="semi_dedicated" aria-required="true" <?php disabled( empty( $types ), true ); ?> >
 			<option value="" default><?php _e( 'None', 'furiagamingcommunity_games' ); ?></option>
 			<?php if ( !empty( $types ) ) : foreach( $types as $type ) : ?>
-				<option value="<?php echo strtolower( $type->slug ); ?>" id="<?php echo 'game-type-' . $type->term_id; ?>" <?php selected( $this->options['semi_dedicated'], $type->slug ); ?> ><?php echo $type->name; ?></option>
-			<?php endforeach; endif; ?>
-		</select>
-		<?php
-	}
-	
+			<option value="<?php echo strtolower( $type->slug ); ?>" id="<?php echo 'game-type-' . $type->term_id; ?>" <?php selected( $this->options['semi_dedicated'], $type->slug ); ?> ><?php echo $type->name; ?></option>
+		<?php endforeach; endif; ?>
+	</select>
+	<?php
+}
+
 } // class Games
 
 endif;

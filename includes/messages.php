@@ -117,4 +117,14 @@ function message_missing_term_permalink( $term ) {
 function message_missing_game_type( $type ) {
 	return __( 'An error occurred while adding the selected game group type', 'furiagamingcommunity_games') . ( ( empty( $type ) ) ? '.' : sprintf( ': %1$s', $type->slug ) );
 }
+
+/**
+ * Returns a formatted message for a game group update.
+ *
+ * @since 1.1.0
+ * @return string A formatted message
+ */
+function message_updated_game_group() {
+	return __( '<em>Game</em> group type was updated successfully.',  'furiagamingcommunity_games' );
+}
 ?>

@@ -157,7 +157,7 @@ if ( class_exists( 'BP_Group_Extension' ) && !class_exists( 'FuriaGamingCommunit
 						else bp_core_add_message( message_missing_game_type( $type ), 'error' );
 					} else {
 						// Context message.
-						bp_core_add_message( __( '<em>Game</em> group type was updated successfully.',  'furiagamingcommunity_games' ) );
+						bp_core_add_message( message_updated_game_group() );
 					}
 				}
 
@@ -167,7 +167,7 @@ if ( class_exists( 'BP_Group_Extension' ) && !class_exists( 'FuriaGamingCommunit
 	 
 			if( !empty( $setting['group-game'] || !empty( $setting['group-game-type'] ) ) )
 				// Success message.
-				bp_core_add_message( __( '<em>Game</em> group was updated successfully.',  'furiagamingcommunity_games' ) );
+				bp_core_add_message( message_updated_game_group() );
 		}
 
 	} // FuriaGamingCommunity_Games_BP_Group_Extension

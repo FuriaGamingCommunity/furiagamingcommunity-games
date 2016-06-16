@@ -35,7 +35,7 @@ if ( !class_exists('FuriaGamingCommunity_Games') ) :
  * @version 1.1.0
  */
 class FuriaGamingCommunity_Games {
-
+	
 	public static function instance() {
 
 		// Store the instance locally to avoid private static replication
@@ -65,6 +65,16 @@ class FuriaGamingCommunity_Games {
 	private function __construct() { /* Do nothing here */ }
 
 	/**
+	 * Setup classes.
+	 *
+	 * @since 1.0.0
+	 */
+	private function classes() {
+
+		$this->games          = new Games();
+	}
+
+	/**
 	 * Bootstrap constants.
 	 *
 	 * @since 1.0.0
@@ -83,20 +93,6 @@ class FuriaGamingCommunity_Games {
 	}
 
 	/**
-	 * Declare class constants.
-	 *
-	 * @since 1.0.0
-	 */
-	private function setup_globals() {
-
-		$this->file           = constant( 'FGC_G_PLUGIN_DIR' ) . __FILE__;
-		$this->basename       = basename( constant( 'FGC_G_PLUGIN_DIR' ) ) . __FILE__;
-
-		$this->plugin_dir     = trailingslashit( constant( 'FGC_G_PLUGIN_DIR' ) );
-		$this->plugin_url     = trailingslashit( constant( 'FGC_G_PLUGIN_URL' ) );
-	}
-
-	/**
 	 * Include required files.
 	 *
 	 * @since 1.0.0
@@ -111,13 +107,17 @@ class FuriaGamingCommunity_Games {
 	}
 
 	/**
-	 * Setup classes.
+	 * Declare class constants.
 	 *
 	 * @since 1.0.0
 	 */
-	private function classes() {
+	private function setup_globals() {
 
-		$this->games          = new Games();
+		$this->file           = constant( 'FGC_G_PLUGIN_DIR' ) . __FILE__;
+		$this->basename       = basename( constant( 'FGC_G_PLUGIN_DIR' ) ) . __FILE__;
+
+		$this->plugin_dir     = trailingslashit( constant( 'FGC_G_PLUGIN_DIR' ) );
+		$this->plugin_url     = trailingslashit( constant( 'FGC_G_PLUGIN_URL' ) );
 	}
 
 } // class FuriaGamingCommunity_Games

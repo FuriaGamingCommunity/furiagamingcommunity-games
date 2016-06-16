@@ -579,9 +579,9 @@ class Games {
 		}
 	}
 
-	/**
-	 * Game Settings
-	 */
+	///////////////////
+	// Game Settings //
+	///////////////////
 
 	/**
 	 * Add options page

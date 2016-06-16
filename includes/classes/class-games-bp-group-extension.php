@@ -39,7 +39,9 @@ if ( class_exists( 'BP_Group_Extension' ) && !class_exists( 'FuriaGamingCommunit
 		 * plugin tab
 		 */
 		function display( $group_id = NULL ) {
-			$group_id = bp_get_group_id();
+			
+			if ( empty( $group_id ) )
+				$group_id = bp_get_group_id();
 
 			// Get group game meta and game list
 			$group_game = groups_get_groupmeta( $group_id, 'group-game' );
@@ -74,6 +76,9 @@ if ( class_exists( 'BP_Group_Extension' ) && !class_exists( 'FuriaGamingCommunit
 		 * of the edit, create, and Dashboard admin panels
 		 */
 		function settings_screen( $group_id = NULL ) {
+
+			if ( empty( $group_id ) )
+				$group_id = bp_get_group_id();
 
 			// Get group game meta and game list
 			$group_game = groups_get_groupmeta( $group_id, 'group-game' );
@@ -132,6 +137,10 @@ if ( class_exists( 'BP_Group_Extension' ) && !class_exists( 'FuriaGamingCommunit
 		 * settings from the edit, create, and Dashboard admin panels
 		 */
 		function settings_screen_save( $group_id = NULL ) {
+			
+			if ( empty( $group_id ) )
+				$group_id = bp_get_group_id();
+
 			$setting['group-game'] = '';
 			$setting['group-game-type'] = '';
 

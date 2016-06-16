@@ -10,8 +10,21 @@
  * @param int|string|array $post Post ID, title, slug, or array of such.
  * @return bool Returns true if the selected race taxonomy is inside the queried post.
  */
-function is_game( $post ) {
-	return is_single( $post );
+function is_game( $post = '' ) {
+	if ( !empty( $post ) ) {
+		if ( is_string( $post ) ) $post = get_game_by_slug( $post );
+		if ( get_post_type( $post ) == 'game' ) {
+			return true;
+		} else {
+			return false;
+		}
+	} else {
+		if ( is_singular( 'game' ) ) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 }
 
 /**
@@ -70,28 +83,21 @@ function is_game_type() {
  */
 function is_game_group() {
 	if ( class_exists( 'BP_Group_Extension' ) ) {
-
+		
 		// Check for group page.
-		if ( bp_is_groups() ) {
+		if ( bp_is_group() ) {
 
 			$group_game = groups_get_groupmeta( bp_get_group_id(), 'group-game' );
 
 			// Check if group meta was set correctly.
 			if ( $group_game ) {
 
-				$game = get_game_by_slug( $group_game );
-
 				// Check if the given meta is a game.
-				if ( is_game( $game) ) {
+				if ( is_game( $group_game ) ) {
 					return true;
 				} else {
 
-					// Group game is no longer valid, so we try to unset it.
-					if ( !groups_delete_groupmeta( bp_get_group_id(), 'group-game', $group_game ) )
-						return new WP_Error( 'invalid_bp_groups_groupmeta_groupgame', message_invalid_bp_groups_groupmeta_groupgame() );
-					else
-						// Already unset(?)
-						return false;
+
 				}
 			} else {
 				// No game set.
@@ -106,19 +112,118 @@ function is_game_group() {
 	} else {
 
 		// Add an admin message.
-		if ( is_admin() && !class_exists( 'BP_Group_Extension' ) )
-			add_action( 'admin_notices', 'admin_notices_missing_bp_groups' );
+		if ( is_admin() ) {
+			if ( !has_action( 'admin_notices', 'admin_notices_missing_bp_groups' ) )
+				add_action( 'admin_notices', 'admin_notices_missing_bp_groups' );
+		}
 		// Add a BuddyPress message.
 		if ( is_buddypress() )
 			bp_core_add_message( message_missing_bp_groups(), 'error' );
 
-		// Return instead a WP_Error object.
-		return new WP_Error( 'missing_bp_groups', message_missing_bp_groups() );
+		// Not a group (as groups are not enabled).
+		return false;
+	}
+}
+
+function is_dedicated_game_group() {
+	if ( class_exists( 'BP_Group_Extension' ) ) {
+
+		if ( is_game_group() ) {
+			
+			$game_group_type = groups_get_groupmeta( bp_get_group_id() , 'group-game-type' );
+
+			if ( $game_group_type ) {
+
+				$game_option = get_game_dedicated_setting();
+
+				if ( ( $game_group_type == $game_option ) && !empty( $game_option ) )
+					return true;
+				else
+					// Not a dedicated group.
+					return false;
+			} else {
+				
+				// Not a group.
+				return false;
+			}
+
+		}
+	} else {
+
+		// Add an admin message.
+		if ( is_admin() ) {
+			if ( !has_action( 'admin_notices', 'admin_notices_missing_bp_groups' ) )
+				add_action( 'admin_notices', 'admin_notices_missing_bp_groups' );
+		}
+		// Add a BuddyPress message.
+		if ( is_buddypress() )
+			bp_core_add_message( message_missing_bp_groups(), 'error' );
+
+		// Not a group (as groups are not enabled).
+		return false;
+	}
+}
+
+function is_semidedicated_game_group() {
+	if ( class_exists( 'BP_Group_Extension' ) ) {
+
+		if ( is_game_group() ) {
+			
+			$game_group_type = groups_get_groupmeta( bp_get_group_id() , 'group-game-type' );
+
+			if ( $game_group_type ) {
+
+				$game_option = get_game_semidedicated_setting();
+
+				if ( ( $game_group_type == $game_option ) && !empty( $game_option ) )
+					return true;
+				else
+					// Not a dedicated group.
+					return false;
+			} else {
+				
+				// Not a group.
+				return false;
+			}
+
+		}
+	} else {
+
+		// Add an admin message.
+		if ( is_admin() ) {
+			if ( !has_action( 'admin_notices', 'admin_notices_missing_bp_groups' ) )
+				add_action( 'admin_notices', 'admin_notices_missing_bp_groups' );
+		}
+		// Add a BuddyPress message.
+		if ( is_buddypress() )
+			bp_core_add_message( message_missing_bp_groups(), 'error' );
+
+		// Not a group (as groups are not enabled).
+		return false;
 	}
 }
 
 /**
- * Get all games
+ * Retrieves game data given a game post ID or post object.
+ * @since 1.1.0
+ *
+ * @param int|WP_Post|null $post   Optional. Post ID or post object. Defaults to global $post.
+ * @param string           $output Optional, default is Object. Accepts OBJECT, ARRAY_A, or ARRAY_N.
+ *                                 Default OBJECT.
+ * @param string           $filter Optional. Type of filter to apply. Accepts 'raw', 'edit', 'db',
+ *                                 or 'display'. Default 'raw'.
+ * @return WP_Post|array|null Type corresponding to $output on success or null on failure.
+ *                            When $output is OBJECT, a `WP_Post` instance is returned.
+ */
+function get_game( $post = null, $output = OBJECT, $filter = 'raw' ) {
+	if( is_game( $post ) ) {
+		return get_post( $post, $output, $filter );
+	}
+	return null;
+}
+
+/**
+ * Retrieves all games
  * @since 1.0.0
  *
  * @return array|bool Retrieves a list of posts matching the game type. Returns false if empty.
@@ -340,6 +445,34 @@ function get_game_types( $post_id ) {
  */
 function get_game_options() {
 	return get_option( 'games_option' );
+}
+
+/**
+ * Retrieves the setting for the game dedicated group option.
+ * @since 1.1.0
+ *
+ * @return string|null Slug for the dedicated setting option or null.
+ */
+function get_game_dedicated_setting() {
+	$option = get_game_options();
+
+	if( !empty( $option['dedicated'] ) )
+		return $option['dedicated']; 
+	else return null; 
+}
+
+/**
+ * Retrieves the setting for the game semi-dedicated group option.
+ * @since 1.1.0
+ *
+ * @return string|null Slug for the semi-dedicated setting option or null.
+ */
+function get_game_semidedicated_setting() {
+	$option = get_game_options();
+
+	if( !empty( $option['semi_dedicated'] ) )
+		return $option['semi_dedicated'];
+	else return null;
 }
 
 /**

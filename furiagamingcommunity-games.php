@@ -52,6 +52,7 @@ class FuriaGamingCommunity_Games {
 			$instance->setup_globals();
 			$instance->includes();
 			$instance->classes();
+			$instance->actions();
 		}
 
 		// Always return the instance
@@ -63,6 +64,20 @@ class FuriaGamingCommunity_Games {
 	 * @since 1.0.0
 	 */
 	private function __construct() { /* Do nothing here */ }
+
+	/**
+	 * Setup actions.
+	 *
+	 * @since 1.1.0
+	 */
+	private function actions() {
+
+		add_action( 'show_user_profile', 'add_games_show_user_profile' );
+		add_action( 'edit_user_profile', 'add_games_edit_user_profile' );
+
+		add_action( 'personal_options_update', 'save_games_personal_options_update' );
+		add_action( 'edit_user_profile_update', 'save_games_edit_user_profile_update' );
+	}
 
 	/**
 	 * Setup classes.

@@ -4,6 +4,86 @@
  */
 
 /**
+ * Adds a selectable area in the user profile to set the game, character and role that he prefers.
+ * @param WP_User $user 
+ */
+function add_games_user_profile( $user ) {
+	
+	$games = get_games();
+
+	/*foreach( $games as $game ) {
+		$races[] = get_games_races($game->ID);
+		$classes[] = get_games_classes($game->ID);
+		$roles[] = get_games_roles($game->ID);
+	}*/
+	?>
+	<h2><?php _e('About your preferred game and character', 'furiagamingcommunity_games'); ?></h2>
+	<table class="form-table">
+		<tr>
+			<th><label for="user_game"><?php _e('Game', 'furiagamingcommunity_games'); ?></label></th>
+			<td>
+				<select name="user_game" id="user_game">
+					<option value="" default><?php _e('None', 'furiagamingcommunity_games'); ?></option>
+					<?php foreach( $games as $game ): ?>
+					<option value="<?php echo $game->ID; ?>" <?php if( get_the_author_meta( 'user_game', $user->ID ) ) selected( esc_attr( get_the_author_meta( 'user_game', $user->ID ) ), $game->ID ); ?>><?php echo $game->post_title; ?></option>
+					<?php endforeach; ?>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<th><label for="user_game_race"><?php _e('Race', 'furiagamingcommunity_games'); ?></label></th>
+			<td>
+				<select name="user_game_race" id="user_game_race">
+					<option value="" default><?php _e('None', 'furiagamingcommunity_games'); ?></option>
+				</select>
+			</td>
+		</tr>
+	</table>
+	<?php
+}
+
+/**
+ * Saves the selectable game information to the user profile.
+ * @param  Integer $user_id The user ID
+ */
+function save_games_user_profile( $user_id )
+{
+    update_user_meta( $user_id,'user_game', sanitize_text_field( $_POST['user_game'] ) );
+}
+
+/**
+ * add_games_user_profile alias.
+ * @since 1.1.0
+ */
+function add_games_edit_user_profile( $user ) {
+	return add_games_user_profile( $user);
+}
+
+/**
+ * add_games_user_profile alias.
+ * @since 1.1.0
+ */
+function add_games_show_user_profile( $user ) {
+	return add_games_user_profile( $user );
+}
+
+/**
+ * save_games_user_profile alias.
+ * @since 1.1.0
+ */
+function save_games_personal_options_update( $user_id ) {
+	return save_games_user_profile( $user_id );
+}
+
+/**
+ * save_games_user_profile alias.
+ * @since 1.1.0
+ */
+function save_games_edit_user_profile_update( $user_id ) {
+	return save_games_user_profile( $user_id );
+}
+
+/**
  * Helper function to check if the current post is a game.
  * @since 1.0.0
  *
@@ -90,15 +170,9 @@ function is_game_group() {
 			$group_game = groups_get_groupmeta( bp_get_group_id(), 'group-game' );
 
 			// Check if group meta was set correctly.
-			if ( $group_game ) {
-
-				// Check if the given meta is a game.
-				if ( is_game( $group_game ) ) {
-					return true;
-				} else {
-
-
-				}
+			if ( $group_game && is_game( $group_game ) ) {
+				// Ok.
+				return true;
 			} else {
 				// No game set.
 				return false;

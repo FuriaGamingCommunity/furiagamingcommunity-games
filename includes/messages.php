@@ -9,8 +9,12 @@
  * @since 1.0.0
  * @return null
  */
-function admin_notices_missing_bp_groups() {	
-	echo '<div class="notice-warning">' . message_missing_bp_groups() . '</div>';
+function admin_notices_missing_bp_groups() {
+	$class = 'notice notice-warning';
+	$message = message_missing_bp_groups();
+
+	printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message ); 
+
 	return null;
 }
 
@@ -21,7 +25,11 @@ function admin_notices_missing_bp_groups() {
  * @return null
  */
 function admin_notices_missing_games() {
-	echo '<div class="notice-warning">' . message_missing_games() . '</div>';
+	$class = 'notice notice-warning';
+	$message = message_missing_games();
+
+	printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message ); 
+
 	return null;
 }
 
@@ -31,8 +39,12 @@ function admin_notices_missing_games() {
  * @since 1.1.0
  * @return null
  */
-function admin_notices_missing_game_type() {	
-	echo '<div class="notice-error">' . message_missing_game_type() . '</div>';
+function admin_notices_missing_game_type() {
+	$class = 'notice notice-error';
+	$message = message_missing_game_type();
+
+	printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message ); 
+
 	return null;
 }
 
@@ -43,7 +55,11 @@ function admin_notices_missing_game_type() {
  * @return null
  */
 function admin_notices_missing_term() {
-	echo '<div class="notice-error">' . message_missing_term() . '</div>';
+	$class = 'notice notice-error';
+	$message = message_missing_term();
+
+	printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message ); 
+
 	return null;
 }
 
@@ -54,7 +70,11 @@ function admin_notices_missing_term() {
  * @return null
  */
 function admin_notices_missing_term_permalink() {
-	echo '<div class="notice-error">' . message_missing_term_permalink() . '</div>';
+	$class = 'notice notice-error';
+	$message = message_missing_term_permalink();
+
+	printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message ); 
+
 	return null;
 }
 
@@ -75,7 +95,7 @@ function message_invalid_bp_groups_groupmeta_groupgame() {
  * @return string A formatted message
  */
 function message_missing_bp_groups() {
-	return sprintf( __( 'Game Group extension needs <strong><a href="%1$s">BuddyPress</a> <em>Groups</em></strong> extension enabled in order to function correctly.', 'furiagamingcommunity_games'), admin_url('options-general.php?page=bp-components') );
+	return sprintf( __( '<em>Game Group Extension</em> needs <strong><a href="%1$s">BuddyPress <em>Groups Extension</em></a></strong> extension enabled in order to function correctly.', 'furiagamingcommunity_games'), admin_url('options-general.php?page=bp-components') );
 }
 
 /**

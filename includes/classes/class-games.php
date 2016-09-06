@@ -36,41 +36,48 @@ class Games {
 	 */
 	public function setup_actions() {
 
-		// Add universal actions
-		add_action( 'init'	, array( $this , 'register_games' ) 	);
-		add_action( 'init'	, array( $this , 'register_races' ) 	);
-		add_action( 'init'	, array( $this , 'register_classes' ) 	);
-		add_action( 'init'	, array( $this , 'register_roles' ) 	);
-		add_action( 'init'	, array( $this , 'register_types' ) 	);
-		add_action( 'init'	, array( $this , 'register_settings' ) 	);
-		
-		// Add universal filters
-		add_filter( 'bp_notifications_get_registered_components'	, array( $this , 'register_notification' ) 	, 9 , 1 );
-		add_filter( 'bp_notifications_get_notifications_for_user'	, array( $this , 'format_notification' ) 	, 9 , 5 );
+		// Object registration actions
+		add_action( 'init', 							array( $this, 'register_games' ) );
+		add_action( 'init', 							array( $this, 'register_races' ) );
+		add_action( 'init', 							array( $this, 'register_classes' ) );
+		add_action( 'init', 							array( $this, 'register_roles' ) );
+		add_action( 'init', 							array( $this, 'register_types' ) );
+		add_action( 'init', 							array( $this, 'register_settings' ) );
+
+		// User profile actions
+		add_action( 'show_user_profile', 				array( $this, 'add_game_show_user_profile' ) );
+		add_action( 'edit_user_profile', 				array( $this, 'add_game_edit_user_profile' ) );
+		add_action( 'personal_options_update', 			array( $this, 'save_game_personal_options_update' ) );
+		add_action( 'edit_user_profile_update', 		array( $this, 'save_game_edit_user_profile_update' ) );
+		add_action( 'wp_enqueue_scripts', 				array( $this, 'enqueue_game_scripts' ) );
 
 		// Admin-only methods
 		if ( is_admin() ) {
 
-			// Admin Filters
-			add_filter( 'post_updated_messages'		, array( $this , 'update_messages' 	)	);
-			add_filter( 'manage_edit-game_columns'	, array( $this , 'edit_game_columns' )	);
+			// Admin filters
+			add_filter( 'post_updated_messages', 		array( $this, 'update_messages' ) );
+			add_filter( 'manage_edit-game_columns', 	array( $this, 'edit_game_columns' )	);
 			
-			// Admin Actions
-			add_action( 'save_post'							, array( $this , 'save_game' )				, 10, 2 );
-			add_action( 'edited_race'						, array( $this , 'save_race' )				, 10, 2 );
-			add_action( 'create_race'						, array( $this , 'save_race' )				, 10, 2 );
-			add_action( 'edited_class'						, array( $this , 'save_class' )				, 10, 2 );  
-			add_action( 'create_class'						, array( $this , 'save_class' )				, 10, 2 );
-			add_action( 'edited_role'						, array( $this , 'save_role' )				, 10, 2 );
-			add_action( 'create_role'						, array( $this , 'save_role' )				, 10, 2 );
-			add_action( 'edited_type'						, array( $this , 'save_type' )				, 10, 2 );
-			add_action( 'create_type'						, array( $this , 'save_type' )				, 10, 2 );
-			add_action( 'admin_menu'						, array( $this , 'remove_game_meta_box' ) 	, 10, 2	);
-			add_action( 'admin_menu'						, array( $this , 'add_plugin_page' ) 		, 10, 2	);
-			add_action( 'admin_init'						, array( $this , 'page_init' ) 				, 10, 2	);
-			add_action( 'add_meta_boxes'					, array( $this , 'add_game_meta_box' ) 		, 10, 2	);
-			add_action( 'manage_posts_custom_column'		, array( $this , 'manage_game_columns' )	, 10, 2	);
+			// Admin actions
+			add_action( 'save_post', 					array( $this, 'save_game' ), 				10, 2 );
+			add_action( 'edited_race', 					array( $this, 'save_race' ), 				10, 2 );
+			add_action( 'create_race', 					array( $this, 'save_race' ), 				10, 2 );
+			add_action( 'edited_class', 				array( $this, 'save_class' ), 				10, 2 );  
+			add_action( 'create_class', 				array( $this, 'save_class' ), 				10, 2 );
+			add_action( 'edited_role', 					array( $this, 'save_role' ), 				10, 2 );
+			add_action( 'create_role', 					array( $this, 'save_role' ), 				10, 2 );
+			add_action( 'edited_type', 					array( $this, 'save_type' ), 				10, 2 );
+			add_action( 'create_type', 					array( $this, 'save_type' ), 				10, 2 );
+			add_action( 'admin_menu', 					array( $this, 'remove_game_meta_box' ), 	10, 2 );
+			add_action( 'admin_menu', 					array( $this, 'add_plugin_page' ), 			10, 2 );
+			add_action( 'admin_init', 					array( $this, 'page_init' ), 				10, 2 );
+			add_action( 'add_meta_boxes', 				array( $this, 'add_game_meta_box' ), 		10, 2 );
+			add_action( 'manage_posts_custom_column', 	array( $this, 'manage_game_columns' ), 		10, 2 );
 		}
+
+		// Add notification filters
+		add_filter( 'bp_notifications_get_registered_components', 	array( $this, 'register_notification' ), 	9, 1 );
+		add_filter( 'bp_notifications_get_notifications_for_user', 	array( $this, 'format_notification' ), 		9, 5 );
 	}
 	
 	/**
@@ -416,46 +423,46 @@ class Games {
          * We need to verify this came from the our screen and with proper authorization,
          * because save_post can be triggered at other times.
          */
- 
+
         // Check if our nonce is set.
         if ( ! isset( $_POST['game_url_meta_box_nonce'] ) ) {
-            return $post_id;
+        	return $post_id;
         }
- 
+
         $nonce = $_POST['game_url_meta_box_nonce'];
- 
+
         // Verify that the nonce is valid.
         if ( ! wp_verify_nonce( $nonce, 'game_url_meta_box' ) ) {
-            return $post_id;
+        	return $post_id;
         }
- 
+
         /*
          * If this is an autosave, our form has not been submitted,
          * so we don't want to do anything.
          */
         if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-            return $post_id;
+        	return $post_id;
         }
- 
+
         // Check the user's permissions.
         if ( 'page' == $_POST['post_type'] ) {
-            if ( ! current_user_can( 'edit_page', $post_id ) ) {
-                return $post_id;
-            }
+        	if ( ! current_user_can( 'edit_page', $post_id ) ) {
+        		return $post_id;
+        	}
         } else {
-            if ( ! current_user_can( 'edit_post', $post_id ) ) {
-                return $post_id;
-            }
+        	if ( ! current_user_can( 'edit_post', $post_id ) ) {
+        		return $post_id;
+        	}
         }
- 
+
         /* OK, it's safe for us to save the data now. */
- 
+
         // Sanitize the user input.
         $mydata = sanitize_text_field( $_POST['game_url'] );
- 
+
         // Update the meta field.
         update_post_meta( $post_id, 'game_url', $mydata );
-	}
+    }
 
 	/**
 	 * Save custom race taxonomy.
@@ -551,15 +558,15 @@ class Games {
 		switch ( $columns ) {
 			
 			case 'type' :
-				// Get the types for the post.
+			// Get the types for the post.
 			$terms = get_the_terms( $post->ID, 'game-types' );
 
-				// If terms were found.
+			// If terms were found.
 			if ( !empty( $terms ) ) {
 
 				$out = array();
 
-					// Loop through each term, linking to the 'edit posts' page for the specific term.
+				// Loop through each term, linking to the 'edit posts' page for the specific term.
 				foreach ( $terms as $term ) {
 					$out[] = sprintf( '<a href="%s">%s</a>',
 						esc_url( add_query_arg( array( 'post_type' => $post->post_type, 'type' => $term->slug ), 'edit.php' ) ),
@@ -567,11 +574,11 @@ class Games {
 						);
 				}
 
-					// Join the terms, separating them with a comma.
+				// Join the terms, separating them with a comma.
 				echo join( ', ', $out );
 			}
 
-				// If no terms were found, output a default message.
+			// If no terms were found, output a default message.
 			else {
 				_e( 'None', 'furiagamingcommunity_games' );
 			}
@@ -693,10 +700,10 @@ class Games {
 			<option value="" default><?php _e( 'None', 'furiagamingcommunity_games' ); ?></option>
 			<?php if ( !empty( $types ) ) : foreach( $types as $type ) : ?>
 			<option value="<?php echo strtolower( $type->slug ); ?>" id="<?php echo 'game-type-' . $type->term_id; ?>" <?php selected( $this->options['dedicated'], $type->slug ); ?> ><?php echo $type->name; ?></option>
-		<?php endforeach; endif; ?>
-	</select>
-	<?php
-}
+			<?php endforeach; endif; ?>
+		</select>
+		<?php
+	}
 
 	/** 
 	 * Get the settings option array and print one of its values
@@ -711,10 +718,123 @@ class Games {
 			<option value="" default><?php _e( 'None', 'furiagamingcommunity_games' ); ?></option>
 			<?php if ( !empty( $types ) ) : foreach( $types as $type ) : ?>
 			<option value="<?php echo strtolower( $type->slug ); ?>" id="<?php echo 'game-type-' . $type->term_id; ?>" <?php selected( $this->options['semi_dedicated'], $type->slug ); ?> ><?php echo $type->name; ?></option>
-		<?php endforeach; endif; ?>
-	</select>
-	<?php
-}
+			<?php endforeach; endif; ?>
+		</select>
+		<?php
+	}
+
+	//////////////////
+	// User Profile //
+	//////////////////
+
+	/**
+	 * Adds a selectable area in the user profile to set the game, character and role that he prefers.
+	 * @param WP_User $user 
+	 */
+	private function add_game_user_profile( $user ) {
+
+		// Get all the games.
+		$games 		= get_games();
+		?>
+
+		<?php if(!$games): ?>
+
+		<?php endif; ?>
+		
+		<h2><?php _e('About your preferred game and character', 'furiagamingcommunity_games'); ?></h2>
+		<table class="form-table">
+			<tr>
+				<th><label for="user_game"><?php _e('Game', 'furiagamingcommunity_games'); ?></label></th>
+				<td>
+					<select name="user_game" id="user_game">
+						<option value="" default><?php _e('None', 'furiagamingcommunity_games'); ?></option>
+						<?php foreach( $games as $game ): ?>
+						<option value="<?php echo $game->ID; ?>" <?php if( get_the_author_meta( 'user_game', $user->ID ) ) selected( esc_attr( get_the_author_meta( 'user_game', $user->ID ) ), $game->ID ); ?>><?php echo $game->post_title; ?></option>
+						<?php endforeach; ?>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<th><label for="user_game_race"><?php _e('Race', 'furiagamingcommunity_games'); ?></label></th>
+				<td>
+					<select name="user_game_race" id="user_game_race">
+						<option value="" default><?php _e('None', 'furiagamingcommunity_games'); ?></option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<th><label for="user_game_class"><?php _e('Class', 'furiagamingcommunity_games'); ?></label></th>
+				<td>
+					<select name="user_game_class" id="user_game_class">
+						<option value="" default><?php _e('None', 'furiagamingcommunity_games'); ?></option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<th><label for="user_game_role"><?php _e('Role', 'furiagamingcommunity_games'); ?></label></th>
+				<td>
+					<select name="user_game_role" id="user_game_role">
+						<option value="" default><?php _e('None', 'furiagamingcommunity_games'); ?></option>
+					</select>
+				</td>
+			</tr>
+		</table>
+		<?php
+	}
+
+	/**
+	 * Saves the selectable game information to the user profile.
+	 * @param  Integer $user_id The user ID
+	 */
+	private function save_game_user_profile( $user_id ) {
+		update_user_meta( $user_id,'user_game', sanitize_text_field( $_POST['user_game'] ) );
+	}
+
+	/**
+	 * add_user_profile alias.
+	 * @since 1.1.0
+	 */
+	public function add_game_edit_user_profile( $user ) {
+		return $this->add_game_user_profile( $user);
+	}
+
+	/**
+	 * add_user_profile alias.
+	 * @since 1.1.0
+	 */
+	public function add_game_show_user_profile( $user ) {
+		return $this->add_game_user_profile( $user );
+	}
+
+	/**
+	 * save_games_user_profile alias.
+	 * @since 1.1.0
+	 */
+	public function save_game_personal_options_update( $user_id ) {
+		return $this->save_game_user_profile( $user_id );
+	}
+
+	/**
+	 * save_games_user_profile alias.
+	 * @since 1.1.0
+	 */
+	public function save_game_edit_user_profile_update( $user_id ) {
+		return $this->save_game_user_profile( $user_id );
+	}
+
+	/**
+	 * Enqueue custom scripts.
+	 * @since 1.1.1
+	 */
+	private function enqueue_game_scripts() {
+
+		$translation_array = array(
+			'ajax_url' => admin_url( 'admin-ajax.php' )
+			);
+
+		wp_enqueue_script( 'games', plugins_url( '/js/games.js', __FILE__ ), array('jquery'), '1.0', true );
+		wp_localize_script( 'games', 'games', $translation_array );
+	}
 
 } // class Games
 

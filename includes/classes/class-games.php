@@ -49,7 +49,10 @@ class Games {
 		add_action( 'edit_user_profile', 				array( $this, 'add_game_edit_user_profile' ) );
 		add_action( 'personal_options_update', 			array( $this, 'save_game_personal_options_update' ) );
 		add_action( 'edit_user_profile_update', 		array( $this, 'save_game_edit_user_profile_update' ) );
-		add_action( 'wp_enqueue_scripts', 				array( $this, 'enqueue_game_scripts' ) );
+
+		add_action( 'wp_ajax_nopriv_add_game_terms', 	array( $this, 'ajax_get_terms' ) );
+		add_action( 'wp_ajax_post_add_game_terms', 		array( $this, 'ajax_get_terms' ) );
+		
 
 		// Admin-only methods
 		if ( is_admin() ) {
@@ -73,6 +76,9 @@ class Games {
 			add_action( 'admin_init', 					array( $this, 'page_init' ), 				10, 2 );
 			add_action( 'add_meta_boxes', 				array( $this, 'add_game_meta_box' ), 		10, 2 );
 			add_action( 'manage_posts_custom_column', 	array( $this, 'manage_game_columns' ), 		10, 2 );
+
+			// Enqueue scripts
+			add_action( 'admin_enqueue_scripts', 		array( $this, 'enqueue_game_scripts' ) );
 		}
 
 		// Add notification filters
@@ -826,14 +832,30 @@ class Games {
 	 * Enqueue custom scripts.
 	 * @since 1.1.1
 	 */
-	private function enqueue_game_scripts() {
+	public function enqueue_game_scripts() {
 
 		$translation_array = array(
 			'ajax_url' => admin_url( 'admin-ajax.php' )
-			);
+		);
 
-		wp_enqueue_script( 'games', plugins_url( '/js/games.js', __FILE__ ), array('jquery'), '1.0', true );
+		var_dump($translation_array);
+
+		wp_enqueue_script( 'games', FGC_G_PLUGIN_URL . '/js/games.js', array('jquery'), '1.0', true );
 		wp_localize_script( 'games', 'games', $translation_array );
+	}
+
+	/**
+	 * Ajax helper function to get current game terms.
+	 * @since 1.2.0
+	 */
+	public function ajax_get_terms() {
+		$terms = get_game_terms( $this->ID );
+
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+			echo $terms;
+		}
+
+		die();
 	}
 
 } // class Games

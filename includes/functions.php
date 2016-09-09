@@ -388,6 +388,24 @@ function get_term_permalink( $term, $taxonomy ) {
 }
 
 /**
+ * Get game terms
+ * @since 1.2.0
+ *
+ * @param int $post_id Post ID.
+ * @return array An array filled with all terms associated to the game meta.
+ */
+function get_game_terms( $post_id ) {
+	$terms['races'] = get_game_races($post_id);
+	$terms['classes'] = get_game_classes($post_id);
+	$terms['roles'] = get_game_roles($post_id);
+	$terms['types'] = get_game_types($post_id);
+
+	var_dump($terms);
+	
+	return $terms;
+}
+
+/**
  * Get game races
  * @since 1.0.0
  *

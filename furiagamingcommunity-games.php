@@ -17,32 +17,32 @@
  * Author:          Xavier Giménez
  * Author URI:      https://es.linkedin.com/pub/javier-gimenez-segovia/
  * Author Email:    xavier.gimenez.segovia@gmail.com
- * Version:         1.0.3
+ * Version:         1.1.1
  * Depends:         BuddyPress
  * Text Domain:     furiagamingcommunity_games
  * License:         GPLv2 or later (LICENSE)
 **/
 
 // Exit if accessed directly
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
-if ( !class_exists('FuriaGamingCommunity_Games') ) :
+if(!class_exists('FuriaGamingCommunity_Games')) :
 
 /**
  * Inits the plugin dependencies.
  *
  * @author Xavier Giménez
- * @version 1.0.1
+ * @version 1.1.1
  */
 class FuriaGamingCommunity_Games {
-
-	public static function instance() {
+	
+	public static function instance(){
 
 		// Store the instance locally to avoid private static replication
 		static $instance = null;
 
 		// Only run these methods if they haven't been run previously
-		if ( null === $instance ) {
+		if(null === $instance){
 			
 			// Setup plugin object.
 			$instance = new FuriaGamingCommunity_Games;
@@ -52,6 +52,7 @@ class FuriaGamingCommunity_Games {
 			$instance->setup_globals();
 			$instance->includes();
 			$instance->classes();
+			$instance->actions();
 		}
 
 		// Always return the instance
@@ -62,7 +63,26 @@ class FuriaGamingCommunity_Games {
 	 * A dummy constructor to prevent FuriaGamingCommunity_Games from being loaded more than once.
 	 * @since 1.0.0
 	 */
-	private function __construct() { /* Do nothing here */ }
+	private function __construct(){ /* Do nothing here */ }
+
+	/**
+	 * Setup actions.
+	 *
+	 * @since 1.1.0
+	 */
+	private function actions(){
+
+	}
+
+	/**
+	 * Setup classes.
+	 *
+	 * @since 1.0.0
+	 */
+	private function classes(){
+
+		$this->games = new Games();
+	}
 
 	/**
 	 * Bootstrap constants.
@@ -72,28 +92,14 @@ class FuriaGamingCommunity_Games {
 	 * @uses plugin_dir_path()
 	 * @uses plugin_dir_url()
 	 */
-	private function constants() {
+	private function constants(){
 
 		// Path
-		if ( ! defined( 'FGC_G_PLUGIN_DIR' ) )
-			define( 'FGC_G_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+		if(! defined('FGC_G_PLUGIN_DIR'))
+			define('FGC_G_PLUGIN_DIR', plugin_dir_path(__FILE__));
 		// URL
-		if ( ! defined( 'FGC_G_PLUGIN_URL' ) )
-			define( 'FGC_G_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-	}
-
-	/**
-	 * Declare class constants.
-	 *
-	 * @since 1.0.0
-	 */
-	private function setup_globals() {
-
-		$this->file           = constant( 'FGC_G_PLUGIN_DIR' ) . __FILE__;
-		$this->basename       = basename( constant( 'FGC_G_PLUGIN_DIR' ) ) . __FILE__;
-
-		$this->plugin_dir     = trailingslashit( constant( 'FGC_G_PLUGIN_DIR' ) );
-		$this->plugin_url     = trailingslashit( constant( 'FGC_G_PLUGIN_URL' ) );
+		if(! defined('FGC_G_PLUGIN_URL'))
+			define('FGC_G_PLUGIN_URL', plugin_dir_url(__FILE__));
 	}
 
 	/**
@@ -101,22 +107,27 @@ class FuriaGamingCommunity_Games {
 	 *
 	 * @since 1.0.0
 	 */
-	private function includes() {
+	private function includes(){
 
-		require( $this->plugin_dir . 'includes/functions.php');
-		require( $this->plugin_dir . 'includes/classes/class-games.php' );
-		require( $this->plugin_dir . 'includes/classes/class-games-bp-group-extension.php' );
-		require( $this->plugin_dir . 'includes/classes/class-games-wp-widget.php' );
+		require($this->plugin_dir . 'includes/functions.php');
+		require($this->plugin_dir . 'includes/messages.php');
+		require($this->plugin_dir . 'includes/classes/class-games.php');
+		require($this->plugin_dir . 'includes/classes/class-games-bp-group-extension.php');
+		require($this->plugin_dir . 'includes/classes/class-games-wp-widget.php');
 	}
 
 	/**
-	 * Setup classes.
+	 * Declare class constants.
 	 *
 	 * @since 1.0.0
 	 */
-	private function classes() {
+	private function setup_globals(){
 
-		$this->games          = new Games();
+		$this->file           = constant('FGC_G_PLUGIN_DIR') . __FILE__;
+		$this->basename       = basename(constant('FGC_G_PLUGIN_DIR')) . __FILE__;
+
+		$this->plugin_dir     = trailingslashit(constant('FGC_G_PLUGIN_DIR'));
+		$this->plugin_url     = trailingslashit(constant('FGC_G_PLUGIN_URL'));
 	}
 
 } // class FuriaGamingCommunity_Games
@@ -128,17 +139,17 @@ class FuriaGamingCommunity_Games {
  * 
  * @return FuriaGamingCommunity_Games The plugin instance
  */
-function furiagamingcommunity_games() {
+function furiagamingcommunity_games(){
 	return FuriaGamingCommunity_Games::instance();
 }
-add_action( 'bp_include', 'furiagamingcommunity_games' );
+add_action('bp_include', 'furiagamingcommunity_games');
 
 /**
  * Register the text domain
  * @since 1.0.0
  */
-function furiagamingcommunity_games_load_textdomain() {
-	load_plugin_textdomain( 'furiagamingcommunity_games', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+function furiagamingcommunity_games_load_textdomain(){
+	load_plugin_textdomain('furiagamingcommunity_games', false, dirname(plugin_basename(__FILE__)) . '/languages');
 }
 add_action('plugins_loaded', 'furiagamingcommunity_games_load_textdomain');
 

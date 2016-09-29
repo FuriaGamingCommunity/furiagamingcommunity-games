@@ -12,7 +12,7 @@ defined('ABSPATH') || exit;
  * The class_exists() check is recommended, to prevent problems
  * during upgrade or when the Groups component is disabled
  */
-if(class_exists('BP_Group_Extension') && !class_exists('FuriaGamingCommunity_Games_BP_Group_Extension')){
+if(bp_is_active('groups') && !class_exists('FuriaGamingCommunity_Games_BP_Group_Extension')){
 
 	/**
 	 * Extends usability of BuddyPress Groups to let their user 
@@ -80,13 +80,14 @@ if(class_exists('BP_Group_Extension') && !class_exists('FuriaGamingCommunity_Gam
 			if(empty($group_id))
 				$group_id = bp_get_group_id();
 
-			// Get group game meta and game list
+			// Get group game meta.
 			$group_game = groups_get_groupmeta($group_id, 'group-game');
 			$group_game_type = groups_get_groupmeta($group_id, 'group-game-type');
+			$group_game_rules = groups_get_groupmeta($group_id, 'group-game-rules');
 
-			// Get the games
+			// Get the games.
 			$games = get_games();
-			// Get the game group types
+			// Get the game group types.
 			$types = get_terms_types();
 			?>
 
@@ -105,6 +106,7 @@ if(class_exists('BP_Group_Extension') && !class_exists('FuriaGamingCommunity_Gam
 			<?php endif; ?>
 			
 			<div>
+				<h4><?php _e('Game group settings', 'furiagamingcommunity_games'); ?></h4>
 				<p><?php _e('Set a game to this group to identify its members as players or as a gaming community. Once set, you will be able to assign it a <strong><em>group type</em></strong>.', 'furiagamingcommunity_games'); ?></p>
 				<p><?php _e('Game group types are used to define different <strong><em>group roles</em></strong>. Groups that are dedicated to the same game may have different purpouses, thus they may have a different group type set.', 'furiagamingcommunity_games'); ?></p>
 			</div>
@@ -113,7 +115,7 @@ if(class_exists('BP_Group_Extension') && !class_exists('FuriaGamingCommunity_Gam
 				<label for="group-game"><?php _e('Group Game', 'furiagamingcommunity_games');?></label>
 				<select name="group-game" id="group-game" aria-required="true" <?php disabled(empty($games), true); ?> >
 					<option value="" default><?php _e('None', 'furiagamingcommunity_games'); ?></option>
-					<?php if(!empty($games)) : foreach($games as $game) :	?>
+					<?php if(!empty($games)) : foreach($games as $game) : ?>
 					<option value="<?php echo strtolower($game->post_name); ?>" id="<?php echo 'game-' . $game->ID; ?>" <?php selected($group_game, $game->post_name); ?> ><?php echo $game->post_title; ?></option>
 					<?php endforeach; endif; ?>
 				</select>
@@ -123,10 +125,18 @@ if(class_exists('BP_Group_Extension') && !class_exists('FuriaGamingCommunity_Gam
 				<label for="group-game-type"><?php _e('Group Type', 'furiagamingcommunity_games');?></label>
 				<select name="group-game-type" id="group-game-type" aria-required="true" <?php disabled(empty($types), true); ?> >
 					<option value="" default><?php _e('None', 'furiagamingcommunity_games'); ?></option>
-					<?php if(!empty($types)) : foreach($types as $type) :	?>
+					<?php if(!empty($types)) : foreach($types as $type) : ?>
 					<option value="<?php echo strtolower($type->slug); ?>" id="<?php echo 'game-type-' . $type->term_id; ?>" <?php selected($group_game_type, $type->slug); ?> ><?php echo $type->name; ?></option>
 					<?php endforeach; endif; ?>
 				</select>
+			</div>
+
+			<div>
+				<label for="group-game-rules"><?php _e('Group Rules', 'furiagamingcommunity_games');?></label>
+				<?php
+					// Load the rich text editor for this field.
+					wp_editor($group_game_rules, 'group-game-rules', array( 'media_buttons' => false ));
+				?>
 			</div>
 
 			<?php
@@ -143,14 +153,17 @@ if(class_exists('BP_Group_Extension') && !class_exists('FuriaGamingCommunity_Gam
 
 			$setting['group-game'] = '';
 			$setting['group-game-type'] = '';
+			$setting['group-game-rules'] = '';
 
 			if(!empty($_POST['group-game'])){
+				// Store the group game.
 				$setting['group-game'] = sanitize_text_field($_POST['group-game']);
-
+				// Update the group name.
 				groups_update_groupmeta($group_id, 'group-game', $setting['group-game']);
 			}
 
-			if(!empty($_POST['group-game-type'])){ 
+			if(!empty($_POST['group-game-type'])){
+				// Store the game group type.
 				$setting['group-game-type'] = sanitize_text_field( $_POST['group-game-type']);
 
 				// Get game group and game group type.
@@ -173,10 +186,18 @@ if(class_exists('BP_Group_Extension') && !class_exists('FuriaGamingCommunity_Gam
 				// Update the group meta.
 				groups_update_groupmeta($group_id, 'group-game-type', $setting['group-game-type']);
 			}
-	 
-			if(!empty($setting['group-game'] || !empty($setting['group-game-type'])))
+
+			if(!empty($_POST['group-game-rules'])){
+				// Load the editor for this field.
+				$setting['group-game-rules'] = wp_kses_post($_POST['group-game-rules']);
+				// Update the group rules.
+				groups_update_groupmeta($group_id, 'group-game-rules', $setting['group-game-rules']);
+			}
+
+			if(!empty($setting['group-game'] || !empty($setting['group-game-type']) || !empty($setting['group-game-rules']))){
 				// Success message.
 				bp_core_add_message(message_updated_game_group());
+			}
 		}
 
 	} // FuriaGamingCommunity_Games_BP_Group_Extension

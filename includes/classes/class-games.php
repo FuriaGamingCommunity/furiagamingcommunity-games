@@ -125,10 +125,10 @@ class Games {
 			'description'			=> __('Custom games played by the community', 'furiagamingcommunity_games'),
 			'public'				=> true,
 			'publicly_queryable'	=> true,
-			'exclude_from_search'	=> true,
+			'exclude_from_search'	=> false,
 			'show_ui'				=> true,
 			'show_in_menu'			=> true,
-			'show_in_nav_menus'		=> false,
+			'show_in_nav_menus'		=> true,
 			'menu_icon'				=> 'dashicons-laptop',
 			'capabilities'			=> $game_capabilities,
 			'map_meta_cap'			=> true,
@@ -650,7 +650,7 @@ class Games {
 			__('Game Type Settings', 'furiagamingcommunity_games'), // Title
 			array($this, 'games_group_types_info'), // Callback
 			'games-admin' // Page
-			);  
+			);
 
 		add_settings_field(
 			'dedicated', // ID
@@ -658,7 +658,7 @@ class Games {
 			array($this, 'dedicated_callback'), // Callback
 			'games-admin', // Page
 			'games_group_types' // Section
-			);      
+			);
 
 		add_settings_field(
 			'semi_dedicated', // ID
@@ -666,7 +666,7 @@ class Games {
 			array($this, 'semi_dedicated_callback'), // Callback
 			'games-admin', // Page
 			'games_group_types' // Section
-			);      
+			);
 	}
 
 	/**

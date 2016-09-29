@@ -30,10 +30,10 @@ if(bp_is_active('groups') && !class_exists('FuriaGamingCommunity_Games_BP_Group_
 			$args = array(
 				'slug' => 'group-extension-games',
 				'name' => __('Games', 'furiagamingcommunity_games'),
-			);
+				);
 			parent::init($args);
 		}
-	 
+
 		/**
 		 * display() contains the markup that will be displayed on the main 
 		 * plugin tab
@@ -49,28 +49,28 @@ if(bp_is_active('groups') && !class_exists('FuriaGamingCommunity_Games_BP_Group_
 			?>
 			
 			<?php if(!$group_game) : ?>
-			
-			<p><?php _e('This group is not set to any game.', 'furiagamingcommunity_games'); ?></p>
-			
+
+				<p><?php _e('This group is not set to any game.', 'furiagamingcommunity_games'); ?></p>
+
 			<?php else : ?>
 				
-			<?php $game = get_game_by_slug($group_game); ?>
-			
-			<p><?php printf(__('This group members are players from <a href="%1$s">%2$s</a>.', 'furiagamingcommunity_games'), get_permalink($game), $game->post_title); ?><p>
+				<?php $game = get_game_by_slug($group_game); ?>
 
-			<?php if($group_game_type) : ?>
+				<p><?php printf(__('This group members are players from <a href="%1$s">%2$s</a>.', 'furiagamingcommunity_games'), get_permalink($game), $game->post_title); ?><p>
 
-			<?php $type = get_term_type_by_slug($group_game_type); ?>
+					<?php if($group_game_type) : ?>
 
-			<p><?php printf(__('This group is a %1$s of %2$s.', 'furiagamingcommunity_games'), get_term_permalink($type, 'game-types'), get_bloginfo('name')); ?><p>
+						<?php $type = get_term_type_by_slug($group_game_type); ?>
 
-			<?php endif; ?>
-			
-			<?php endif; ?>
+						<p><?php printf(__('This group is a %1$s of %2$s.', 'furiagamingcommunity_games'), get_term_permalink($type, 'game-types'), get_bloginfo('name')); ?><p>
 
-			<?php
-		}
-	 
+						<?php endif; ?>
+
+					<?php endif; ?>
+
+					<?php
+				}
+
 		/**
 		 * settings_screen() is the catch-all method for displaying the content 
 		 * of the edit, create, and Dashboard admin panels
@@ -92,56 +92,50 @@ if(bp_is_active('groups') && !class_exists('FuriaGamingCommunity_Games_BP_Group_
 			?>
 
 			<?php if(empty($games) && empty($types)) : ?>
-			<div id="message" class="info">
-				<p><?php _e('You need to set up at least one game and one game type before being able to assign them to any group.', 'furiagamingcommunity_games'); ?></p>
-			</div>
+				<div id="message" class="info">
+					<p><?php _e('You need to set up at least one game and one game type before being able to assign them to any group.', 'furiagamingcommunity_games'); ?></p>
+				</div>
 			<?php elseif(empty($games) && !empty($types)) : ?>
-			<div id="message" class="info">
-				<p><?php _e('You need to set up at least one game before being able to assign them to any group.', 'furiagamingcommunity_games'); ?></p>
-			</div>
+				<div id="message" class="info">
+					<p><?php _e('You need to set up at least one game before being able to assign them to any group.', 'furiagamingcommunity_games'); ?></p>
+				</div>
 			<?php elseif(!empty($games) && empty($types)) : ?>
-			<div id="message" class="info">
-				<p><?php _e('You need to set up at least one game type before being able to assign them to any game group.', 'furiagamingcommunity_games'); ?></p>
-			</div>
+				<div id="message" class="info">
+					<p><?php _e('You need to set up at least one game type before being able to assign them to any game group.', 'furiagamingcommunity_games'); ?></p>
+				</div>
 			<?php endif; ?>
 			
-			<div>
-				<h4><?php _e('Game group settings', 'furiagamingcommunity_games'); ?></h4>
-				<p><?php _e('Set a game to this group to identify its members as players or as a gaming community. Once set, you will be able to assign it a <strong><em>group type</em></strong>.', 'furiagamingcommunity_games'); ?></p>
-				<p><?php _e('Game group types are used to define different <strong><em>group roles</em></strong>. Groups that are dedicated to the same game may have different purpouses, thus they may have a different group type set.', 'furiagamingcommunity_games'); ?></p>
-			</div>
+			<h4><?php _e('Game group settings', 'furiagamingcommunity_games'); ?></h4>
+			<p><?php _e('Set a game to this group to identify its members as players or as a gaming community. Once set, you will be able to assign it a <strong><em>group type</em></strong>.', 'furiagamingcommunity_games'); ?></p>
 
-			<div>
-				<label for="group-game"><?php _e('Group Game', 'furiagamingcommunity_games');?></label>
-				<select name="group-game" id="group-game" aria-required="true" <?php disabled(empty($games), true); ?> >
-					<option value="" default><?php _e('None', 'furiagamingcommunity_games'); ?></option>
-					<?php if(!empty($games)) : foreach($games as $game) : ?>
+			<label for="group-game"><?php _e('Group Game', 'furiagamingcommunity_games');?></label>
+			<select name="group-game" id="group-game" aria-required="true" <?php disabled(empty($games), true); ?> >
+				<option value="" default><?php _e('None', 'furiagamingcommunity_games'); ?></option>
+				<?php if(!empty($games)) : foreach($games as $game) : ?>
 					<option value="<?php echo strtolower($game->post_name); ?>" id="<?php echo 'game-' . $game->ID; ?>" <?php selected($group_game, $game->post_name); ?> ><?php echo $game->post_title; ?></option>
-					<?php endforeach; endif; ?>
-				</select>
-			</div>
+				<?php endforeach; endif; ?>
+			</select>
 
-			<div>
-				<label for="group-game-type"><?php _e('Group Type', 'furiagamingcommunity_games');?></label>
-				<select name="group-game-type" id="group-game-type" aria-required="true" <?php disabled(empty($types), true); ?> >
-					<option value="" default><?php _e('None', 'furiagamingcommunity_games'); ?></option>
-					<?php if(!empty($types)) : foreach($types as $type) : ?>
+			<p><?php _e('Game group types are used to define different <strong><em>group roles</em></strong>. Groups that are dedicated to the same game may have different purpouses, thus they may have a different group type set.', 'furiagamingcommunity_games'); ?></p>
+
+			<label for="group-game-type"><?php _e('Group Type', 'furiagamingcommunity_games');?></label>
+			<select name="group-game-type" id="group-game-type" aria-required="true" <?php disabled(empty($types), true); ?> >
+				<option value="" default><?php _e('None', 'furiagamingcommunity_games'); ?></option>
+				<?php if(!empty($types)) : foreach($types as $type) : ?>
 					<option value="<?php echo strtolower($type->slug); ?>" id="<?php echo 'game-type-' . $type->term_id; ?>" <?php selected($group_game_type, $type->slug); ?> ><?php echo $type->name; ?></option>
-					<?php endforeach; endif; ?>
-				</select>
-			</div>
+				<?php endforeach; endif; ?>
+			</select>
 
-			<div>
-				<label for="group-game-rules"><?php _e('Group Rules', 'furiagamingcommunity_games');?></label>
-				<?php
+			<h4><?php _e('Game rules', 'furiagamingcommunity_games'); ?></h4>
+			<p><?php _e('Use the following text area to write the set of rules, if any, for the current game group. You can be as thorough as you want but mind to be clear and succinct to make it easier for your readers.', 'furiagamingcommunity_games'); ?></p>
+			<?php
 					// Load the rich text editor for this field.
-					wp_editor($group_game_rules, 'group-game-rules', array( 'media_buttons' => false ));
-				?>
-			</div>
+			wp_editor($group_game_rules, 'group-game-rules', array( 'media_buttons' => false ));
+			?>
 
 			<?php
 		}
-	 
+
 		/**
 		 * settings_screen_save() contains the catch-all logic for saving 
 		 * settings from the edit, create, and Dashboard admin panels
@@ -204,8 +198,8 @@ if(bp_is_active('groups') && !class_exists('FuriaGamingCommunity_Games_BP_Group_
 
 	bp_register_group_extension('FuriaGamingCommunity_Games_BP_Group_Extension');
 
-	} else {
-		if(is_admin() && !class_exists('BP_Group_Extension'))
-			add_action('admin_notices', 'admin_notices_missing_bp_groups');
-	}
+} else {
+	if(is_admin() && !class_exists('BP_Group_Extension'))
+		add_action('admin_notices', 'admin_notices_missing_bp_groups');
+}
 ?>

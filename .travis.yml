@@ -25,4 +25,4 @@ script:
 
 after_script:
     - source $DEV_LIB_PATH/travis.after_script.sh
-    - bash < (curl -s https://codecov.io/bash)
+    - bash <(curl -s https://codecov.io/bash)

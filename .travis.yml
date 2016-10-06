@@ -4,6 +4,15 @@ language:
     - php
     - node_js
 
+notifications:
+    email:
+      on_success: never
+      on_failure: change
+
+branches:
+  only:
+    - master
+
 php:
     - 5.4
     - 5.5
@@ -12,13 +21,20 @@ php:
 
 env:
     - WP_VERSION=latest WP_MULTISITE=0
-    - WP_VERSION=trunk WP_MULTISITE=0
+
+matrix:
+    include:
+      - php: 5.3
+        env: WP_VERSION=latest WP_MULTISITE=1
 
 install:
     - export DEV_LIB_PATH=dev-lib
     - if [ ! -e "$DEV_LIB_PATH" ] && [ -L .travis.yml ]; then export DEV_LIB_PATH=$( dirname $( readlink .travis.yml ) ); fi
     - if [ ! -e "$DEV_LIB_PATH" ]; then git clone https://github.com/xwp/wp-dev-lib.git $DEV_LIB_PATH; fi
     - source $DEV_LIB_PATH/travis.install.sh
+
+before_script:
+    - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
 
 script:
     - source $DEV_LIB_PATH/travis.script.sh

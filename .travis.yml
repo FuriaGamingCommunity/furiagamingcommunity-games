@@ -22,7 +22,8 @@ install:
 
 script:
     - source $DEV_LIB_PATH/travis.script.sh
-    - vendor/bin/phpunit --coverage-clover=coverage.xml
+    - phpunit --coverage-clover=coverage.xml
+    - phpunit --coverage-html code-coverage-report/
 
 after_script:
     - source $DEV_LIB_PATH/travis.after_script.sh

@@ -9,9 +9,17 @@ notifications:
       on_success: never
       on_failure: change
 
+# blacklist
 branches:
-  only:
-    - master
+  except:
+    - legacy
+    - experimental
+
+# whitelist
+#branches:
+#  only:
+#    - master
+#    - stable
 
 php:
     - 5.4

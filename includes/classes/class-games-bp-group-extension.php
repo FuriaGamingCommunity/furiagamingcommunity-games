@@ -28,48 +28,12 @@ if(bp_is_active('groups') && !class_exists('FuriaGamingCommunity_Games_BP_Group_
 		 */
 		function __construct(){
 			$args = array(
-				'slug' => 'group-extension-games',
-				'name' => __('Games', 'furiagamingcommunity_games'),
+				'slug'     => 'group-extension-games',
+				'name'     => __('Games', 'furiagamingcommunity_games'),
+				'show_tab' => 'noone'
 				);
 			parent::init($args);
 		}
-
-		/**
-		 * display() contains the markup that will be displayed on the main 
-		 * plugin tab
-		 */
-		function display($group_id = NULL){
-			
-			if(empty($group_id))
-				$group_id = bp_get_group_id();
-
-			// Get group game meta and game list
-			$group_game = groups_get_groupmeta($group_id, 'group-game');
-			$group_game_type = groups_get_groupmeta($group_id, 'group-game-type');
-			?>
-			
-			<?php if(!$group_game) : ?>
-
-				<p><?php _e('This group is not set to any game.', 'furiagamingcommunity_games'); ?></p>
-
-			<?php else : ?>
-				
-				<?php $game = get_game_by_slug($group_game); ?>
-
-				<p><?php printf(__('This group members are players from <a href="%1$s">%2$s</a>.', 'furiagamingcommunity_games'), get_permalink($game), $game->post_title); ?><p>
-
-					<?php if($group_game_type) : ?>
-
-						<?php $type = get_term_type_by_slug($group_game_type); ?>
-
-						<p><?php printf(__('This group is a %1$s of %2$s.', 'furiagamingcommunity_games'), get_term_permalink($type, 'game-types'), get_bloginfo('name')); ?><p>
-
-						<?php endif; ?>
-
-					<?php endif; ?>
-
-					<?php
-				}
 
 		/**
 		 * settings_screen() is the catch-all method for displaying the content 
@@ -105,7 +69,7 @@ if(bp_is_active('groups') && !class_exists('FuriaGamingCommunity_Games_BP_Group_
 				</div>
 			<?php endif; ?>
 			
-			<h4><?php _e('Game group settings', 'furiagamingcommunity_games'); ?></h4>
+			<h3><?php _e('Game group settings', 'furiagamingcommunity_games'); ?></h3>
 			<p><?php _e('Set a game to this group to identify its members as players or as a gaming community. Once set, you will be able to assign it a <strong><em>group type</em></strong>.', 'furiagamingcommunity_games'); ?></p>
 
 			<label for="group-game"><?php _e('Group Game', 'furiagamingcommunity_games');?></label>
@@ -126,7 +90,7 @@ if(bp_is_active('groups') && !class_exists('FuriaGamingCommunity_Games_BP_Group_
 				<?php endforeach; endif; ?>
 			</select>
 
-			<h4><?php _e('Game rules', 'furiagamingcommunity_games'); ?></h4>
+			<h3><?php _e('Game rules', 'furiagamingcommunity_games'); ?></h3>
 			<p><?php _e('Use the following text area to write the set of rules, if any, for the current game group. You can be as thorough as you want but mind to be clear and succinct to make it easier for your readers.', 'furiagamingcommunity_games'); ?></p>
 			<?php
 					// Load the rich text editor for this field.

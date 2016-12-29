@@ -390,10 +390,10 @@ class Games {
 	public function add_game_meta_box(){
 		
 		// Add our customized featured image box.
-		add_meta_box('postimagediv', __('Game Logo', 'furiagamingcommunity_games'), 'post_thumbnail_meta_box' , 'game', 'normal', 'high');
+		add_meta_box('postimagediv', __('Game Image', 'furiagamingcommunity_games'), 'post_thumbnail_meta_box' , 'game', 'normal', 'high');
 
 		// Add the Game URL meta box.
-		add_meta_box('posturldiv', __('Game URL', 'furiagamingcommunity_games'),	array($this, 'game_url_meta_box'), 'game', 'normal', 'high'	);
+		add_meta_box('posturldiv', __('Game URL', 'furiagamingcommunity_games'), array($this, 'game_url_meta_box'), 'game', 'normal', 'high');
 	}
 
 	/**
@@ -883,7 +883,7 @@ class Games {
 
 	public function enqueue_game_styles(){
 		wp_register_style( 'game_style', FGC_G_PLUGIN_URL . '/css/games.css', false, '1.0.0' );
-        wp_enqueue_style( 'game_style' );
+		wp_enqueue_style( 'game_style' );
 	}
 
 	/**

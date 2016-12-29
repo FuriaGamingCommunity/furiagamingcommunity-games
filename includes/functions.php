@@ -119,6 +119,12 @@ function is_game_group(){
 	}
 }
 
+/**
+ * Checks if the current group is a dedicated group of players.
+ * @since 1.1.0
+ *
+ * @return bool Returns true if the selected type taxonomy is inside the queried post.
+ */
 function is_dedicated_game_group(){
 	if(class_exists('BP_Group_Extension')){
 
@@ -158,6 +164,12 @@ function is_dedicated_game_group(){
 	}
 }
 
+/**
+ * Checks if the current group is a semidedicated group of players.
+ * @since 1.1.0
+ *
+ * @return bool Returns true if the selected type taxonomy is inside the queried post.
+ */
 function is_semidedicated_game_group(){
 	if(class_exists('BP_Group_Extension')){
 
